@@ -10,4 +10,6 @@ public class Test implements Serializable{
 
 @Id
 private long testId;
+
+private String name;
 }
