@@ -14,7 +14,7 @@ public class ClaimPK implements Serializable {
 	private long productId;
 	private long userId;
 	@Temporal(TemporalType.DATE)
-	private Date ClaimDate;
+	private Date claimDate;
 
 	public ClaimPK() {
 		super();
@@ -24,7 +24,39 @@ public class ClaimPK implements Serializable {
 		super();
 		this.productId = productId;
 		this.userId = userId;
-		ClaimDate = claimDate;
+		this.claimDate = claimDate;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((claimDate == null) ? 0 : claimDate.hashCode());
+
+		result = (int) (prime * result + productId);
+		result = (int) (prime * result + userId);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ClaimPK other = (ClaimPK) obj;
+		if (claimDate == null) {
+			if (other.claimDate != null)
+				return false;
+		} else if (!claimDate.equals(other.claimDate))
+			return false;
+		if (productId != other.productId)
+			return false;
+		if (userId != other.userId)
+			return false;
+		return true;
 	}
 
 	public long getProductId() {
@@ -44,11 +76,13 @@ public class ClaimPK implements Serializable {
 	}
 
 	public Date getClaimDate() {
-		return ClaimDate;
+		return claimDate;
 	}
 
 	public void setClaimDate(Date claimDate) {
-		ClaimDate = claimDate;
+		this.claimDate = claimDate;
 	}
+
+	
 
 }

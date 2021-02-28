@@ -24,10 +24,6 @@ public class Provider implements Serializable {
 	@OneToMany(mappedBy = "provider")
 	private List<EntryQuantity> entryQuantity;
 
-	
-	
-	
-	
 	public Provider() {
 		super();
 	}

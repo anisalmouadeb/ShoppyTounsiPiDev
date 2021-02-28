@@ -33,9 +33,14 @@ public class Product implements Serializable {
 	
 	@OneToMany(mappedBy = "product")
 	private List<EntryQuantity> entryQuantity;
+	
+	@OneToMany(mappedBy = "product")
+	private List<OrderLine> orderline;
 
 	@OneToMany(mappedBy = "product")
 	private List<Claim> claim;
+	
+	
 	
 	public Product(String name, String description, float priceV, float priceA, int quantity, long code,
 			Category category, boolean isApproved, String image, List<Ad> ads) {
@@ -152,6 +157,22 @@ public class Product implements Serializable {
 
 	public void setAds(List<Ad> ads) {
 		this.ads = ads;
+	}
+
+	public List<OrderLine> getOrderline() {
+		return orderline;
+	}
+
+	public void setOrderline(List<OrderLine> orderline) {
+		this.orderline = orderline;
+	}
+
+	public List<Claim> getClaim() {
+		return claim;
+	}
+
+	public void setClaim(List<Claim> claim) {
+		this.claim = claim;
 	}
 
 }
