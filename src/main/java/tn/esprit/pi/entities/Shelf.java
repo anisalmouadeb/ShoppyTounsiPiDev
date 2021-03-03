@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Shelf implements Serializable {
 
@@ -22,13 +25,15 @@ public class Shelf implements Serializable {
 	@Id
 	private long ShelfId;
 	private String Shelfname;
+	@Column(unique=true)
 	private int position;
 	@Temporal(TemporalType.DATE)
 	private Date dateCreation;
 	@Enumerated(EnumType.STRING)
 	private ShelfType type;
 	private String image;
-
+	
+	@JsonIgnore
 	@OneToMany(mappedBy = "shelf")
 	private List<Category> category;
 

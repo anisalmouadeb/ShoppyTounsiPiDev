@@ -30,18 +30,16 @@ public class Product implements Serializable {
 
 	@OneToMany(mappedBy = "product")
 	private List<Ad> ads;
-	
-	@OneToMany(mappedBy = "product")
-	private List<EntryQuantity> entryQuantity;
-	
+
 	@OneToMany(mappedBy = "product")
 	private List<OrderLine> orderline;
 
 	@OneToMany(mappedBy = "product")
 	private List<Claim> claim;
-	
-	
-	
+
+	@OneToMany(mappedBy = "product")
+	private List<Entry> entry;
+
 	public Product(String name, String description, float priceV, float priceA, int quantity, long code,
 			Category category, boolean isApproved, String image, List<Ad> ads) {
 		super();
@@ -59,16 +57,6 @@ public class Product implements Serializable {
 
 	public Product() {
 		super();
-	}
-	
-	
-
-	public List<EntryQuantity> getEntryQuantity() {
-		return entryQuantity;
-	}
-
-	public void setEntryQuantity(List<EntryQuantity> entryQuantity) {
-		this.entryQuantity = entryQuantity;
 	}
 
 	public long getProductId() {
@@ -173,6 +161,14 @@ public class Product implements Serializable {
 
 	public void setClaim(List<Claim> claim) {
 		this.claim = claim;
+	}
+
+	public List<Entry> getEntry() {
+		return entry;
+	}
+
+	public void setEntry(List<Entry> entry) {
+		this.entry = entry;
 	}
 
 }

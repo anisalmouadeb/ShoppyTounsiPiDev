@@ -21,8 +21,7 @@ public class Provider implements Serializable {
 	private String email;
 	private int note;
 
-	@OneToMany(mappedBy = "provider")
-	private List<EntryQuantity> entryQuantity;
+
 
 	public Provider() {
 		super();
@@ -67,12 +66,5 @@ public class Provider implements Serializable {
 		this.note = note;
 	}
 
-	public List<EntryQuantity> getEntryQuantity() {
-		return entryQuantity;
-	}
-
-	public void setEntryQuantity(List<EntryQuantity> entryQuantity) {
-		this.entryQuantity = entryQuantity;
-	}
 
 }
