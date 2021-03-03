@@ -1,7 +1,6 @@
 package tn.esprit.pi.controller;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sun.el.parser.ParseException;
+
 
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.Product;
-import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.service.IStockService;
 
 @RestController

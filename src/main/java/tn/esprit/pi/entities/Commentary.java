@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 
 @Entity
@@ -21,7 +22,17 @@ public class Commentary implements Serializable {
 	private int rating;
 	private int nbLikes;
 	private int nbDislikes;
+	@ManyToOne
+	private Post post;
 
+
+	public Post getPost() {
+		return post;
+	}
+
+	public void setPost(Post post) {
+		this.post = post;
+	}
 
 	public Commentary() {
 		super();
@@ -74,7 +85,6 @@ public class Commentary implements Serializable {
 	public void setNbDislikes(int nbDislikes) {
 		this.nbDislikes = nbDislikes;
 	}
-
 
 
 }
