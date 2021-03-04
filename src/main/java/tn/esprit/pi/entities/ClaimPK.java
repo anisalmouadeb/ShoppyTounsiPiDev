@@ -15,6 +15,8 @@ public class ClaimPK implements Serializable {
 	private long userId;
 	@Temporal(TemporalType.DATE)
 	private Date claimDate;
+	
+	
 
 	public ClaimPK() {
 		super();
