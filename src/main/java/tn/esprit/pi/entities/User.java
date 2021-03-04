@@ -26,6 +26,9 @@ public class User implements Serializable {
 	private String address;
 	private String email;
 	private String numTel;
+	private String password;
+
+
 	private int age;
 	private boolean isConnected;
 	private boolean viewAd;
@@ -192,6 +195,12 @@ public class User implements Serializable {
 		this.orders = orders;
 	}
 
+	public String getPassword() {
+		return password;
+	}
 
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 }

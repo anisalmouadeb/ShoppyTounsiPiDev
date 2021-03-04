@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import tn.esprit.pi.entities.Provider;
+import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.service.IproviderService;
 
 @RestController
@@ -21,23 +23,36 @@ public class ProviderRestControllerImpl {
 
 	@PostMapping("/addProvider")
 	@ResponseBody
-	public Provider addShelf(@RequestBody Provider provider) {
+	public Provider addProvider(@RequestBody Provider provider) {
 		iProviderService.addProvider(provider);
 		return provider;
 	}
 
 	@DeleteMapping("/deleteProviderById/{idProvider}")
 	@ResponseBody
-	public void deleteEmployeById(@PathVariable("idProvider") long providerId) {
+	public void deleteProviderById(@PathVariable("idProvider") long providerId) {
 		iProviderService.DeleteProviderById(providerId);
 
 	}
 
 	@GetMapping(value = "/getAllProviders")
 	@ResponseBody
-	public List<Provider> getAllEmployes() {
+	public List<Provider> getAllProviders() {
 
 		return iProviderService.getAllProviders();
 	}
 
+	@GetMapping(value = "/getProviderById/{idProvider}")
+	@ResponseBody
+	public Provider getProviderById(@PathVariable("idProvider") long providerId) {
+
+		return iProviderService.getProviderById(providerId);
+	}
+	
+	@PutMapping("/updateProvider")
+	@ResponseBody
+	public Provider updateShelf(@RequestBody Provider provider) {
+		iProviderService.updateProvider(provider);
+		return provider;
+	}
 }

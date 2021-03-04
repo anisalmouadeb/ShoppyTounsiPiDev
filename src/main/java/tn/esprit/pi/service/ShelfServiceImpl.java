@@ -93,5 +93,9 @@ public class ShelfServiceImpl implements IShelfService {
 		return shelf;
 	}
 
+	@Override
+	public List<Category> getAllCategoryByShelfJPQL(long Shelfid) {
+		return shelfRepository.getAllCategoryByShelfJPQL(Shelfid);
+	}
 
 }

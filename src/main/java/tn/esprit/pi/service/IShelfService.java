@@ -2,6 +2,9 @@ package tn.esprit.pi.service;
 
 import java.util.List;
 
+
+
+import tn.esprit.pi.entities.Category;
 import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.entities.ShelfType;
 
@@ -25,6 +28,6 @@ public interface IShelfService {
 	
 	public List<String> getAllCategoriesNameByShelfId(long shelfId);
 	
-	
+	 public List<Category> getAllCategoryByShelfJPQL(long Shelfid);
 	
 }

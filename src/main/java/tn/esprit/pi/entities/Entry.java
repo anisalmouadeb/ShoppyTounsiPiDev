@@ -11,6 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Entry implements Serializable {
 
@@ -22,8 +24,13 @@ public class Entry implements Serializable {
 	private int quantity;
 	@Temporal(TemporalType.DATE)
 	private Date entryDate;
+	
+	@JsonIgnore
 	@ManyToOne
 	private Product product;
+	@JsonIgnore
+	@ManyToOne
+	private Provider provider;
 
 	
 	
@@ -62,6 +69,14 @@ public class Entry implements Serializable {
 
 	public void setProduct(Product product) {
 		this.product = product;
+	}
+
+	public Provider getProvider() {
+		return provider;
+	}
+
+	public void setProvider(Provider provider) {
+		this.provider = provider;
 	}
 
 }

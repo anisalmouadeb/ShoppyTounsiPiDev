@@ -1,12 +1,13 @@
 package tn.esprit.pi.entities;
 
 import java.io.Serializable;
-
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Provider implements Serializable {
@@ -19,7 +20,8 @@ public class Provider implements Serializable {
 	private String name;
 	private String email;
 	private int note;
-
+	@OneToMany(mappedBy = "provider")
+	private List<Entry> entry;
 
 
 	public Provider() {
@@ -63,6 +65,14 @@ public class Provider implements Serializable {
 
 	public void setNote(int note) {
 		this.note = note;
+	}
+
+	public List<Entry> getEntry() {
+		return entry;
+	}
+
+	public void setEntry(List<Entry> entry) {
+		this.entry = entry;
 	}
 
 

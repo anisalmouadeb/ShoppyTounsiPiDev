@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import tn.esprit.pi.entities.Category;
 import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.entities.ShelfType;
 import tn.esprit.pi.service.IShelfService;
@@ -83,5 +84,9 @@ public class ShelfRestControllerImpl {
 		return ishelfService.getAllCategoriesNameByShelfId(shelfId);
 	}
 	
-	
+	@GetMapping(value = "getAllCategoriesByShelfId/{idshelf}")
+    @ResponseBody
+	public List<Category> getAllCategoriesByShelfId(@PathVariable("idshelf") int shelfId) {
+		return ishelfService.getAllCategoryByShelfJPQL(shelfId);
+	}
 }
