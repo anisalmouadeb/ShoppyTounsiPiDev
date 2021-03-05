@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import tn.esprit.pi.entities.Category;
+import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.entities.ShelfType;
 import tn.esprit.pi.service.IShelfService;
@@ -68,7 +69,7 @@ public class ShelfRestControllerImpl {
 	@PutMapping(value = "/updatePosition/{id}/{newposition}")
 	@ResponseBody
 	public void updatePositionById(@PathVariable("newposition") int position, @PathVariable("id") long shelfId) {
-		ishelfService.mettreAjourPositionShelById(position, shelfId);
+		ishelfService.updatePositionShelById(position, shelfId);
 
 	}
 	
@@ -89,4 +90,10 @@ public class ShelfRestControllerImpl {
 	public List<Category> getAllCategoriesByShelfId(@PathVariable("idshelf") int shelfId) {
 		return ishelfService.getAllCategoryByShelfJPQL(shelfId);
 	}
+	@GetMapping(value = "getAllProductsByShelfId/{idshelf}")
+    @ResponseBody
+	public List<Product> getAllProductsByShelfId(@PathVariable("idshelf") int shelfId) {
+		return ishelfService.getAllProductByShelfJPQL(shelfId);
+	}
+	
 }

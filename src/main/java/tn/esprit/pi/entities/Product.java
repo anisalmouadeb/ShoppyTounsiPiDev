@@ -1,6 +1,8 @@
 package tn.esprit.pi.entities;
 
 import java.io.Serializable;
+
+
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -9,6 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 
 @Entity
 public class Product implements Serializable {
@@ -25,23 +30,19 @@ public class Product implements Serializable {
 	private long code;
 	@ManyToOne
 	private Category category;
-	private boolean isApproved;
+	private boolean inPromo;
 	private String image;
 
 	@OneToMany(mappedBy = "product")
 	private List<Ad> ads;
-
-	@OneToMany(mappedBy = "product")
-	private List<OrderLine> orderline;
-
 	@OneToMany(mappedBy = "product")
 	private List<Claim> claim;
-
+	@JsonBackReference
 	@OneToMany(mappedBy = "product")
 	private List<Entry> entry;
 
 	public Product(String name, String description, float priceV, float priceA, int quantity, long code,
-			Category category, boolean isApproved, String image, List<Ad> ads) {
+			Category category, boolean inPromo, String image, List<Ad> ads) {
 		super();
 		this.name = name;
 		this.description = description;
@@ -50,7 +51,7 @@ public class Product implements Serializable {
 		this.quantity = quantity;
 		this.code = code;
 		this.category = category;
-		this.isApproved = isApproved;
+		this.inPromo = inPromo;
 		this.image = image;
 		this.ads = ads;
 	}
@@ -123,12 +124,14 @@ public class Product implements Serializable {
 		this.category = category;
 	}
 
-	public boolean isApproved() {
-		return isApproved;
+
+
+	public boolean isInPromo() {
+		return inPromo;
 	}
 
-	public void setApproved(boolean isApproved) {
-		this.isApproved = isApproved;
+	public void setInPromo(boolean inPromo) {
+		this.inPromo = inPromo;
 	}
 
 	public String getImage() {
@@ -147,13 +150,6 @@ public class Product implements Serializable {
 		this.ads = ads;
 	}
 
-	public List<OrderLine> getOrderline() {
-		return orderline;
-	}
-
-	public void setOrderline(List<OrderLine> orderline) {
-		this.orderline = orderline;
-	}
 
 	public List<Claim> getClaim() {
 		return claim;

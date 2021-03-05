@@ -1,14 +1,15 @@
 package tn.esprit.pi.service;
 
-import java.util.ArrayList;
+import java.util.ArrayList
+;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import tn.esprit.pi.entities.Category;
+import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.entities.ShelfType;
 import tn.esprit.pi.repository.CategoryRepository;
@@ -56,7 +57,7 @@ public class ShelfServiceImpl implements IShelfService {
 	}
 
 	@Override
-	public void mettreAjourPositionShelById(int position, long shelfId) {
+	public void updatePositionShelById(int position, long shelfId) {
 		Shelf shelf = shelfRepository.findById(shelfId).get();
 		shelf.setPosition(position);
 		shelfRepository.save(shelf);
@@ -98,4 +99,11 @@ public class ShelfServiceImpl implements IShelfService {
 		return shelfRepository.getAllCategoryByShelfJPQL(Shelfid);
 	}
 
+	@Override
+	public List<Product> getAllProductByShelfJPQL(long Shelfid) {
+		
+		return shelfRepository.getAllProductByShelfJPQL(Shelfid);
+	}
+
+	
 }

@@ -10,13 +10,14 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Entry implements Serializable {
-
-	
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,17 +25,12 @@ public class Entry implements Serializable {
 	private int quantity;
 	@Temporal(TemporalType.DATE)
 	private Date entryDate;
-	
-	@JsonIgnore
+	@JsonManagedReference
 	@ManyToOne
 	private Product product;
-	@JsonIgnore
 	@ManyToOne
 	private Provider provider;
 
-	
-	
-	
 	public Entry() {
 		super();
 	}

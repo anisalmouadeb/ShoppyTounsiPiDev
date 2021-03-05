@@ -1,6 +1,5 @@
 package tn.esprit.pi.controller;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-
-
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.Product;
+import tn.esprit.pi.entities.Provider;
 import tn.esprit.pi.entities.Shelf;
+import tn.esprit.pi.repository.ProductRepository;
+import tn.esprit.pi.repository.ProviderRepository;
 import tn.esprit.pi.service.IStockService;
 
 @RestController
@@ -26,57 +26,53 @@ public class StockRestControllerImpl {
 	@Autowired
 	IStockService iStockService;
 
-	@GetMapping(value = "listMissingProduct")
-	@ResponseBody
-	public List<Product> getAllEmployeByEntreprise() {
 
-		return iStockService.listMissigProduct();
+	@GetMapping(value = "getListMissingProduct")
+	@ResponseBody
+	public List<Product> getListMissigProduct() {
+
+		return iStockService.getListMissigProduct();
 	}
-	
+
 	@PostMapping("/addEntry")
 	@ResponseBody
-	public Entry addShelf(@RequestBody Entry entry) {
+	public Entry addEntry(@RequestBody Entry entry) {
 		iStockService.addEntry(entry);
 		return entry;
 	}
-	
-	
-	@PutMapping(value = "/affecterentryAProduct/{idprod}/{identry}") 
-	public String affecterDepartementAEntreprise(@PathVariable("idprod")long productId, @PathVariable("identry")long entryId) {
-	return	iStockService.affectProductToEntry(productId, entryId);
-	}
-	
+
 	@DeleteMapping("/deleteEntryById/{identry}")
 	@ResponseBody
-	public String deleteEmployeById(@PathVariable("identry") long entryId) {
+	public String deleteEntryById(@PathVariable("identry") long entryId) {
 		return iStockService.deleteEntry(entryId);
 
 	}
+
 	@GetMapping(value = "/getAllEntry")
 	@ResponseBody
-	public List<Entry> getAllEmployes() {
+	public List<Entry> getAllEntrys() {
 
 		return iStockService.getAllEntry();
 	}
-	
-	
+
 	@GetMapping(value = "/getEntryById/{identry}")
 	@ResponseBody
-	public Entry getAllEntryById(@PathVariable("identry") long entryId) 
-{
+	public Entry getEntryById(@PathVariable("identry") long entryId) {
 
-		return iStockService.getEntryById(entryId);	
-	
-}
-	@GetMapping(value = "getEntryByProduct/{productId}")  
+		return iStockService.getEntryById(entryId);
+
+	}
+
+	@GetMapping(value = "getEntryByProduct/{productId}")
 	@ResponseBody
-	public List<Entry> getEntryByProduct(@PathVariable("productId") long productId) {
+	public List<Entry> getAllEntryByProduct(@PathVariable("productId") long productId) {
 		return iStockService.getEntryByProduct(productId);
 	}
-	@GetMapping(value = "getEntryByProvider/{providerId}")  
+
+	@GetMapping(value = "getEntryByProvider/{providerId}")
 	@ResponseBody
-	public List<Entry> getEntryByProvider(@PathVariable("providerId") long providerId) {
+	public List<Entry> getAllEntryByProvider(@PathVariable("providerId") long providerId) {
 		return iStockService.getEntryByProvider(providerId);
 	}
-	
+
 }

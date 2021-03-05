@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class User implements Serializable {
@@ -27,8 +28,6 @@ public class User implements Serializable {
 	private String email;
 	private String numTel;
 	private String password;
-
-
 	private int age;
 	private boolean isConnected;
 	private boolean viewAd;
@@ -45,8 +44,8 @@ public class User implements Serializable {
 	@ManyToMany(mappedBy = "user")
 	private List<Event> event;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	private List<Orders> orders;
+	@OneToOne(mappedBy="user")
+	private ShoppingCart shoppingcart;
 
 
 	public User(long cin, String name, String address, String email, String numTel, int age, boolean isConnected,
@@ -187,12 +186,12 @@ public class User implements Serializable {
 		this.event = event;
 	}
 
-	public List<Orders> getOrders() {
-		return orders;
+	public ShoppingCart getShoppingcart() {
+		return shoppingcart;
 	}
 
-	public void setOrders(List<Orders> orders) {
-		this.orders = orders;
+	public void setShoppingcart(ShoppingCart shoppingcart) {
+		this.shoppingcart = shoppingcart;
 	}
 
 	public String getPassword() {
