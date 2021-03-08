@@ -14,5 +14,8 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
 	public List<Product> listMissingProduct();
 
 	Product findByName(String name);
+	
+	
+	
 
 }

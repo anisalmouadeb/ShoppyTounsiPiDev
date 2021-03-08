@@ -28,11 +28,11 @@ public interface ShelfRepository extends CrudRepository<Shelf,Long> {
     public List<Category> getAllCategoryByShelfJPQL(@Param("id") long Shelfid);
 	
 	@Query("Select "
-			+ "DISTINCT prod from Product prod "
+			+ "prod.name from Product prod "
 			+ "join prod.category cat "
 			+ "join cat.shelf s "
 			+ "where s.ShelfId=:id ")
-    public List<Product> getAllProductByShelfJPQL(@Param("id") long Shelfid);
+    public List<String> getAllProductByShelfJPQL(@Param("id") long Shelfid);
 	
 	
 }

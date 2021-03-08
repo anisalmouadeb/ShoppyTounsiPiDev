@@ -23,9 +23,9 @@ public class Entry implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long entryId;
 	private int quantity;
+	private float montant;
 	@Temporal(TemporalType.DATE)
-	private Date entryDate;
-	@JsonManagedReference
+	private Date entryDate= new Date(System.currentTimeMillis());
 	@ManyToOne
 	private Product product;
 	@ManyToOne
@@ -34,6 +34,17 @@ public class Entry implements Serializable {
 	public Entry() {
 		super();
 	}
+
+	
+	public float getMontant() {
+		return montant;
+	}
+
+
+	public void setMontant(float montant) {
+		this.montant = montant;
+	}
+
 
 	public long getEntryId() {
 		return entryId;

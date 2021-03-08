@@ -17,4 +17,5 @@ public interface IStockService {
 	public Entry getEntryById(long entryId);
 	public List<Entry> getEntryByProduct(long productId);
 	public List<Entry> getEntryByProvider(long providerId);
+	public int getNomberProvider(long providerId);
 }

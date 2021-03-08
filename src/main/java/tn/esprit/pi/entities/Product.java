@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 @Entity
@@ -32,12 +33,11 @@ public class Product implements Serializable {
 	private Category category;
 	private boolean inPromo;
 	private String image;
-
 	@OneToMany(mappedBy = "product")
 	private List<Ad> ads;
 	@OneToMany(mappedBy = "product")
 	private List<Claim> claim;
-	@JsonBackReference
+@JsonIgnore
 	@OneToMany(mappedBy = "product")
 	private List<Entry> entry;
 

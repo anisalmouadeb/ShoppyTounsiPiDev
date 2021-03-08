@@ -75,7 +75,6 @@ public class ProductRestControllerImpl {
 	@RequestMapping(value="/addImage",method=RequestMethod.POST,consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Object> uploadFile (@RequestParam("multipartFile") MultipartFile multipartFile,@RequestParam("productId") Long productId) throws IOException
 	{
-		
 		File convertImage = new File("C:\\test\\"+multipartFile.getOriginalFilename());
 		convertImage.createNewFile();
 		FileOutputStream fout =new FileOutputStream(convertImage);

@@ -26,14 +26,11 @@ public class Post implements Serializable {
 	private int nbDislikes;
 	@ManyToOne
 	private User user;
-	
-	
 	@OneToMany(mappedBy = "post")
 	private List<Commentary> commentary;
 	public List<Commentary> getCommentary() {
 		return commentary;
 	}
-
 	public void setCommentary(List<Commentary> commentary) {
 		this.commentary = commentary;
 	}

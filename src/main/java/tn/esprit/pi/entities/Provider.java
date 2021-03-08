@@ -23,7 +23,9 @@ public class Provider implements Serializable {
 	private String name;
 	private String email;
 	private int note;
-	
+	private float deleviryFees;
+	private float seuilMontant;
+	private int reductionPercentage;
 	@JsonIgnore
 	@OneToMany(mappedBy = "provider",cascade=CascadeType.ALL)
 	private List<Entry> entry;
@@ -43,7 +45,27 @@ public class Provider implements Serializable {
 		this.email = email;
 		this.note = note;
 	}
+	
+	
 
+	public float getDeleviryFees() {
+		return deleviryFees;
+	}
+	public void setDeleviryFees(float deleviryFees) {
+		this.deleviryFees = deleviryFees;
+	}
+	public float getSeuilMontant() {
+		return seuilMontant;
+	}
+	public void setSeuilMontant(float seuilMontant) {
+		this.seuilMontant = seuilMontant;
+	}
+	public int getReductionPercentage() {
+		return reductionPercentage;
+	}
+	public void setReductionPercentage(int reductionPercentage) {
+		this.reductionPercentage = reductionPercentage;
+	}
 	public long getProviderId() {
 		return providerId;
 	}

@@ -3,9 +3,11 @@ package tn.esprit.pi.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
+import tn.esprit.pi.configuration.EmailConfig;
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Provider;
@@ -15,6 +17,13 @@ import tn.esprit.pi.repository.ProviderRepository;
 
 @Service
 public class StockServiceImpl implements IStockService {
+	
+	private EmailConfig emailCfg;
+
+    public StockServiceImpl(EmailConfig emailCfg) {
+        this.emailCfg = emailCfg;
+    }
+	
 	@Autowired
 	ProductRepository productRepository;
 	@Autowired
@@ -34,14 +43,29 @@ public class StockServiceImpl implements IStockService {
 		Product product = productRepository.findById(entry.getProduct().getProductId()).get();
 		entry.setProvider(provider);
 		entry.setProduct(product);
-		entryRepository.save(entry);
+		int quantity = entry.getQuantity();
+		product.setQuantity(product.getQuantity()+quantity);
+		
+		float m=entry.getQuantity()*product.getPriceA()+provider.getDeleviryFees();
+		
+		if(entryRepository.NbEntryProvider(provider.getProviderId())>=3||m>=provider.getSeuilMontant())
+		{
+			
+			m = m - (m*provider.getReductionPercentage())/100;
+		}
+		
+		entry.setMontant(m);
+		
+        entryRepository.save(entry);
 		return entry.getEntryId();
 	}
 
 	@Override
 	public String deleteEntry(long entryId) {
 		Entry entry = entryRepository.findById(entryId).get();
-
+		if (entry == null) {
+			return "introuvable";
+		}
 		entryRepository.delete(entry);
 		return "delete succes";
 	}
@@ -67,4 +91,9 @@ public class StockServiceImpl implements IStockService {
 		return entryRepository.getEntryByProvider(providerId);
 	}
 
+	@Override
+	public int getNomberProvider(long providerId) {
+	return entryRepository.NbEntryProvider(providerId);
+	}
+	
 }

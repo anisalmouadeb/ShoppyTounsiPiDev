@@ -2,6 +2,7 @@ package tn.esprit.pi.controller;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,14 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.Product;
-import tn.esprit.pi.entities.Provider;
-import tn.esprit.pi.entities.Shelf;
-import tn.esprit.pi.repository.ProductRepository;
-import tn.esprit.pi.repository.ProviderRepository;
+
 import tn.esprit.pi.service.IStockService;
 
 @RestController
 public class StockRestControllerImpl {
+
+
 
 	@Autowired
 	IStockService iStockService;
@@ -36,14 +36,16 @@ public class StockRestControllerImpl {
 
 	@PostMapping("/addEntry")
 	@ResponseBody
-	public Entry addEntry(@RequestBody Entry entry) {
+	public String addEntry(@RequestBody Entry entry) {
 		iStockService.addEntry(entry);
-		return entry;
+		return "stock updated with success";
 	}
 
 	@DeleteMapping("/deleteEntryById/{identry}")
 	@ResponseBody
 	public String deleteEntryById(@PathVariable("identry") long entryId) {
+		
+		
 		return iStockService.deleteEntry(entryId);
 
 	}
@@ -59,6 +61,9 @@ public class StockRestControllerImpl {
 	@ResponseBody
 	public Entry getEntryById(@PathVariable("identry") long entryId) {
 
+		if(iStockService.getEntryById(entryId)==null)
+		{}
+		
 		return iStockService.getEntryById(entryId);
 
 	}
@@ -75,4 +80,11 @@ public class StockRestControllerImpl {
 		return iStockService.getEntryByProvider(providerId);
 	}
 
+	@GetMapping(value = "getNomberEntryProvider/{providerId}")
+	@ResponseBody
+	public int getNomberEntryProvider(@PathVariable("providerId") long providerId){
+
+		return iStockService.getNomberProvider(providerId);
+	}
+	
 }

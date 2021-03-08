@@ -22,4 +22,11 @@ public interface EntryRepository extends CrudRepository<Entry, Long>{
 			+ "join e.provider p "
 			+ "where p.providerId=:providerId") 
 	public List<Entry> getEntryByProvider(@Param("providerId")long providerId);
+	
+	@Query("Select count(*)from Entry e "
+			+ "join e.provider p "
+			+ "where p.providerId=:providerId") 
+	public int NbEntryProvider(@Param("providerId")long providerId);
+	
+	
 }
