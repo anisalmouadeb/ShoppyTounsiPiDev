@@ -2,6 +2,7 @@ package tn.esprit.pi.entities;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -20,13 +21,12 @@ public class Category implements Serializable {
 	@Id
 	private long categoryId;
 	private String name;
-	@OneToMany(mappedBy = "category")
+	@OneToMany(mappedBy = "category",cascade=CascadeType.REMOVE)
 	private List<Product> product;
 	@Enumerated(EnumType.STRING)
 	private ShelfType type;
 	@ManyToOne 
 	private Shelf shelf;
-	
 	public Category(String name, List<Product> product, ShelfType type, Shelf shelf) {
 		super();
 		this.name = name;

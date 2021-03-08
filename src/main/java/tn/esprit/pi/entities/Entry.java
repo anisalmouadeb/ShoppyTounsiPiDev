@@ -10,27 +10,41 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Entry implements Serializable {
-
-	
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long entryId;
 	private int quantity;
+	private float montant;
 	@Temporal(TemporalType.DATE)
-	private Date entryDate;
+	private Date entryDate= new Date(System.currentTimeMillis());
 	@ManyToOne
 	private Product product;
+	@ManyToOne
+	private Provider provider;
 
-	
-	
-	
 	public Entry() {
 		super();
 	}
+
+	
+	public float getMontant() {
+		return montant;
+	}
+
+
+	public void setMontant(float montant) {
+		this.montant = montant;
+	}
+
 
 	public long getEntryId() {
 		return entryId;
@@ -62,6 +76,14 @@ public class Entry implements Serializable {
 
 	public void setProduct(Product product) {
 		this.product = product;
+	}
+
+	public Provider getProvider() {
+		return provider;
+	}
+
+	public void setProvider(Provider provider) {
+		this.provider = provider;
 	}
 
 }

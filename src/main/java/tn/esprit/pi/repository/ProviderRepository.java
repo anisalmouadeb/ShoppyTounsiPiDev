@@ -8,6 +8,7 @@ import tn.esprit.pi.entities.Provider;
 @Repository
 public interface ProviderRepository extends CrudRepository<Provider, Long>{
 
+ Provider findByName(String name);
 
 
 }

@@ -2,37 +2,29 @@ package tn.esprit.pi.entities;
 
 import java.io.Serializable;
 
-import javax.persistence.EmbeddedId;
+
+
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 @Entity
 public class OrderLine implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@EmbeddedId
-	private OrderLinePK orderLinePK;
-
-	@ManyToOne
-	@JoinColumn(name = "productId", referencedColumnName = "productId", insertable = false, updatable = false)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id
+	private long orderLineId;
+	@OneToOne
 	private Product product;
-
-	@ManyToOne
-	@JoinColumn(name = "orderId", referencedColumnName = "orderId", insertable = false, updatable = false)
-	private Orders order;
-
 	public int quantity;
-
-	public OrderLinePK getOrderLinePK() {
-		return orderLinePK;
-	}
-
-	public void setOrderLinePK(OrderLinePK orderLinePK) {
-		this.orderLinePK = orderLinePK;
-	}
-
+	@ManyToOne
+	private ShoppingCart shoppingCart;
+	
 	public Product getProduct() {
 		return product;
 	}
@@ -41,12 +33,12 @@ public class OrderLine implements Serializable {
 		this.product = product;
 	}
 
-	public Orders getOrder() {
-		return order;
+	public long getOrderLineId() {
+		return orderLineId;
 	}
 
-	public void setOrder(Orders order) {
-		this.order = order;
+	public void setOrderLineId(long orderLineId) {
+		this.orderLineId = orderLineId;
 	}
 
 	public int getQuantity() {
@@ -57,4 +49,14 @@ public class OrderLine implements Serializable {
 		this.quantity = quantity;
 	}
 
+	public ShoppingCart getShoppingCart() {
+		return shoppingCart;
+	}
+
+	public void setShoppingCart(ShoppingCart shoppingCart) {
+		this.shoppingCart = shoppingCart;
+	}
+
+	
+	
 }

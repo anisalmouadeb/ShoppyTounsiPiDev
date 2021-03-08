@@ -1,5 +1,7 @@
 package tn.esprit.pi.entities;
+
 import java.io.Serializable;
+
 import java.util.Date;
 import java.util.List;
 
@@ -7,7 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -25,18 +27,14 @@ public class Orders implements Serializable {
 	@Temporal(TemporalType.DATE)
 	private Date eventDate;
 
-	@ManyToOne
-	private User user;
-
 	@OneToOne(mappedBy = "order")
 	private Delivery delivery;
 	@OneToOne(mappedBy = "order")
 	private Bill bill;
-	
-	@OneToMany(mappedBy = "order")
+
+	@OneToMany
 	private List<OrderLine> orderLine;
-	
-	
+
 	public Orders() {
 		super();
 	}
@@ -62,14 +60,6 @@ public class Orders implements Serializable {
 		this.eventDate = eventDate;
 	}
 
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
 	public Delivery getDelivery() {
 		return delivery;
 	}
@@ -93,7 +83,5 @@ public class Orders implements Serializable {
 	public void setOrderLine(List<OrderLine> orderLine) {
 		this.orderLine = orderLine;
 	}
-	
-	
 
 }

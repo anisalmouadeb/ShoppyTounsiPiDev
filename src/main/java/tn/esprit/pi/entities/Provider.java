@@ -1,12 +1,16 @@
 package tn.esprit.pi.entities;
 
 import java.io.Serializable;
+import java.util.List;
 
-
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Provider implements Serializable {
@@ -19,11 +23,20 @@ public class Provider implements Serializable {
 	private String name;
 	private String email;
 	private int note;
-
+	private float deleviryFees;
+	private float seuilMontant;
+	private int reductionPercentage;
+	@JsonIgnore
+	@OneToMany(mappedBy = "provider",cascade=CascadeType.ALL)
+	private List<Entry> entry;
 
 
 	public Provider() {
 		super();
+	}
+	public Provider(long id) {
+		super();
+		this.providerId=id;
 	}
 
 	public Provider(String name, String email, int note) {
@@ -32,7 +45,27 @@ public class Provider implements Serializable {
 		this.email = email;
 		this.note = note;
 	}
+	
+	
 
+	public float getDeleviryFees() {
+		return deleviryFees;
+	}
+	public void setDeleviryFees(float deleviryFees) {
+		this.deleviryFees = deleviryFees;
+	}
+	public float getSeuilMontant() {
+		return seuilMontant;
+	}
+	public void setSeuilMontant(float seuilMontant) {
+		this.seuilMontant = seuilMontant;
+	}
+	public int getReductionPercentage() {
+		return reductionPercentage;
+	}
+	public void setReductionPercentage(int reductionPercentage) {
+		this.reductionPercentage = reductionPercentage;
+	}
 	public long getProviderId() {
 		return providerId;
 	}
@@ -63,6 +96,14 @@ public class Provider implements Serializable {
 
 	public void setNote(int note) {
 		this.note = note;
+	}
+
+	public List<Entry> getEntry() {
+		return entry;
+	}
+
+	public void setEntry(List<Entry> entry) {
+		this.entry = entry;
 	}
 
 

@@ -12,5 +12,9 @@ public interface IproviderService {
 
 	public List<Provider> getAllProviders();
 	
+	public 	Provider getProviderById(long  providerId) ;
+	
+	public Provider updateProvider(Provider provider );
+	
 
 }
