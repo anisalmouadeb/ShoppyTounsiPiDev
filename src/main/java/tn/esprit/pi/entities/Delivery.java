@@ -25,7 +25,7 @@ public class Delivery implements Serializable {
 	@ManyToOne
 	private DeliveryMan deliveryMan;
 	@OneToOne
-	private Orders order;
+	private Order order;
 
 	public Delivery(Date deliveryDate, int fees) {
 		super();
@@ -69,11 +69,11 @@ public class Delivery implements Serializable {
 		this.deliveryMan = deliveryMan;
 	}
 
-	public Orders getOrder() {
+	public Order getOrder() {
 		return order;
 	}
 
-	public void setOrder(Orders order) {
+	public void setOrder(Order order) {
 		this.order = order;
 	}
 

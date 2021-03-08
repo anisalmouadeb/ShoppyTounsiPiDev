@@ -16,7 +16,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-public class Orders implements Serializable {
+public class Order implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,11 +35,11 @@ public class Orders implements Serializable {
 	@OneToMany
 	private List<OrderLine> orderLine;
 
-	public Orders() {
+	public Order() {
 		super();
 	}
 
-	public Orders(Date eventDate) {
+	public Order(Date eventDate) {
 		super();
 		this.eventDate = eventDate;
 	}
