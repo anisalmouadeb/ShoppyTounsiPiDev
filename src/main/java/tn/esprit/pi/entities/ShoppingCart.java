@@ -26,6 +26,9 @@ public class ShoppingCart implements Serializable{
 	@Temporal(TemporalType.DATE)
 	private Date dateCreation;
 	
+	
+	private int quantity;
+	
 	@OneToOne
 	private User user;
 	
