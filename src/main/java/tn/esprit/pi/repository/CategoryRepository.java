@@ -8,4 +8,5 @@ import tn.esprit.pi.entities.Category;
 @Repository
 public interface CategoryRepository extends CrudRepository<Category, Long>{
 
+	public Category findByName(String name);
 }

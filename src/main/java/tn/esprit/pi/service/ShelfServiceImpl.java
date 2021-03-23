@@ -1,17 +1,35 @@
 package tn.esprit.pi.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import tn.esprit.pi.configuration.ServiceT;
+import tn.esprit.pi.configuration.SmsRequest;
 import tn.esprit.pi.entities.Category;
+import tn.esprit.pi.entities.HistoriqueShelf;
+import tn.esprit.pi.entities.OrderLine;
+import tn.esprit.pi.entities.Orders;
 import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.entities.ShelfRating;
 import tn.esprit.pi.entities.ShelfType;
 import tn.esprit.pi.entities.User;
+import tn.esprit.pi.payload.CategoryRevenulastThreeDays;
+import tn.esprit.pi.payload.ShelfOcc;
+import tn.esprit.pi.payload.ShelfRevenu;
 import tn.esprit.pi.repository.CategoryRepository;
+import tn.esprit.pi.repository.HistoriqueShelfRepository;
+import tn.esprit.pi.repository.ProductRepository;
 import tn.esprit.pi.repository.ShelfRatingRepository;
 import tn.esprit.pi.repository.UserRepository;
 import tn.esprit.pi.repository.ShelfRepository;
@@ -20,27 +38,44 @@ import tn.esprit.pi.repository.ShelfRepository;
 public class ShelfServiceImpl implements IShelfService {
 
 	@Autowired
+	HistoriqueShelfRepository historiqueShelfRepository;
+	@Autowired
 	ShelfRepository shelfRepository;
 	@Autowired
 	CategoryRepository categoryRepository;
 	@Autowired
 	ShelfRatingRepository shelfRatingRepository;
 	@Autowired
-	UserRepository UserRepository;
+	UserRepository userRepository;
+	@Autowired
+	ProductRepository productRepository;
+	@Autowired
+	ServiceT s;
 
 	@Override
-	public long addShelf(Shelf shelf) {
+	public String addShelf(Shelf shelf) {
 
-		List<Shelf> shelfs = new ArrayList<>();
-		shelfs = (List<Shelf>) shelfRepository.findAll();
+		if (shelf.getType().equals(ShelfType.PROMO)) {
+			shelf.setDateExpiration(new Date(System.currentTimeMillis()));
+			List<CategoryRevenulastThreeDays> cat= new ArrayList<CategoryRevenulastThreeDays>();
+			cat=this.getCategoryLastThreeDays();
+			CategoryRevenulastThreeDays c = new CategoryRevenulastThreeDays();
+			c=cat.get(0);
+			System.out.println(c.getCategoryName());
+			Category category = categoryRepository.findByName(c.getCategoryName());
+			System.out.println(category.getName());
+			shelfRepository.save(shelf);
+			this.affecterCategoryShelf(category.getCategoryId(), shelf.getShelfId());
+		}
+		if (shelf.getType().equals(ShelfType.RAMADHAN)) {
+			Date d = new Date(System.currentTimeMillis());
 
-		for (Shelf s : shelfs) {
-			if (s.getPromo() == true) {
-				return 0;
-			}
+			Date expiration = new Date(d.getTime() + (24 * 86400000));
+			Date expiration2 = new Date(expiration.getTime() + (6 * 86400000));
+			shelf.setDateExpiration(expiration2);
 		}
 		shelfRepository.save(shelf);
-		return shelf.getShelfId();
+		return "added";
 	}
 
 	@Override
@@ -52,13 +87,12 @@ public class ShelfServiceImpl implements IShelfService {
 
 			for (Product p : cat.getProduct()) {
 				p.setInPromo(false);
-				p.setPriceV(p.getPriceV() + (p.getPriceV() * shelf.getReduction()) / 100);
+				p.setPriceV(p.getPriceV() + (p.getPriceV() * shelf.getReductionPercantage()) / 100);
 
 			}
 			cat.setShelf(null);
 
 		}
-
 		shelfRepository.delete(shelf);
 		return "supprimer avec succ";
 	}
@@ -67,6 +101,287 @@ public class ShelfServiceImpl implements IShelfService {
 	public List<Shelf> getAllShelfs() {
 
 		return (List<Shelf>) shelfRepository.findAll();
+
+	}
+
+	@Override
+	public List<Shelf> getShelfs(Authentication auth) {
+		List<Shelf> shelfs = new ArrayList<Shelf>();
+		List<ShelfOcc> shelfocc = new ArrayList<ShelfOcc>();
+		shelfs = (List<Shelf>) shelfRepository.findAll();
+		Date d = new Date(System.currentTimeMillis());
+		List<Product> products = new ArrayList<Product>();
+		List<Shelf> shelfs2 = new ArrayList<Shelf>();
+
+		for (Shelf s : shelfs) {
+			if (s.getType().equals(ShelfType.PROMO) && s.getDateExpiration().compareTo(d) > 0) {
+				Shelf shelf=s.calculateNewPrice();
+				shelfs2.add(shelf);
+			}
+		}
+		for (Shelf s : shelfs) {
+			if (s.getType().equals(ShelfType.RAMADHAN) && s.getDateExpiration().compareTo(d) > 0) {
+				shelfs2.add(s);
+			}
+		}
+
+		if (auth == null) {
+			for (Shelf s : this.listShelfForNotAuth()) {
+				shelfs2.add(s);
+			}
+		} else {
+
+			User u = userRepository.findByName(auth.getName()).get();
+			products = this.getOders(auth);
+
+			for (Shelf s : shelfs) {
+				ShelfOcc sho = new ShelfOcc();
+				int occ = 0;
+				for (Product p : products) {
+					if (p.getCategory().getShelf().getShelfId() == s.getShelfId()) {
+						occ++;
+					}
+				}
+				sho.setOcc(occ);
+				sho.setShelf(s);
+				shelfocc.add(sho);
+			}
+
+			Collections.sort(shelfocc);
+			List<ShelfOcc> shelfocc2 = new ArrayList<ShelfOcc>();
+			for (ShelfOcc s : shelfocc) {
+				if (!s.getShelf().getType().equals(ShelfType.RAMADHAN)
+						&& !s.getShelf().getType().equals(ShelfType.PROMO) && s.getOcc() > 0)
+					shelfs2.add(s.getShelf());
+				else if (!s.getShelf().getType().equals(ShelfType.RAMADHAN)
+						&& !s.getShelf().getType().equals(ShelfType.PROMO))
+					shelfocc2.add(s);
+			}
+
+			if (u.getAge() < 15) {
+
+				for (ShelfOcc s : shelfocc2) {
+
+					if (s.getShelf().getType().equals(ShelfType.ENFANT)) {
+
+						shelfs2.add(s.getShelf());
+
+					}
+				}
+
+				for (ShelfOcc s : shelfocc2) {
+					if (u.getSex().equals("FEMME")) {
+						if (s.getShelf().getType().equals(ShelfType.FEMME)) {
+							shelfs2.add(s.getShelf());
+
+						}
+					} else if (s.getShelf().getType().equals(ShelfType.HOMME)) {
+						shelfs2.add(s.getShelf());
+
+					}
+				}
+
+				for (ShelfOcc s : shelfocc2) {
+
+					if (!shelfs2.contains(s.getShelf())) {
+						// if not exist in shelfs2
+
+						shelfs2.add(s.getShelf());
+					}
+
+				}
+
+			} else {
+				for (ShelfOcc s : shelfocc2) {
+					if (u.getSex().equals("FEMME")) {
+						if (s.getShelf().getType().equals(ShelfType.FEMME)) {
+							shelfs2.add(s.getShelf());
+
+						}
+					} else if (s.getShelf().getType().equals(ShelfType.HOMME)) {
+						shelfs2.add(s.getShelf());
+
+					}
+				}
+
+				for (ShelfOcc s : shelfocc2) {
+
+					if (!shelfs2.contains(s.getShelf())) {
+
+						shelfs2.add(s.getShelf());
+					}
+
+				}
+
+			}
+		}
+		return shelfs2;
+	}
+
+	public List<Shelf> listShelfForNotAuth() {
+		List<Shelf> shelfs = new ArrayList<Shelf>();
+		List<Shelf> shelfsord = new ArrayList<Shelf>();
+		shelfsord = shelfRepository.getShelfdOrderByRating();
+		for (Shelf s1 : shelfsord) {
+			if (!s1.getType().equals(ShelfType.RAMADHAN) && !s1.getType().equals(ShelfType.PROMO)) {
+				shelfs.add(s1);
+			}
+		}
+
+		return shelfs;
+
+	}
+
+	@Override
+	public List<Product> getOders(Authentication auth) {
+		List<OrderLine> ordersLine = new ArrayList<OrderLine>();
+		User u = userRepository.findByName(auth.getName()).get();
+		List<Product> p = new ArrayList<Product>();
+		List<Orders> orders = new ArrayList<Orders>();
+		orders = shelfRepository.getAllOrder();
+		if (u.getShoppingcart() != null) {
+			ordersLine = u.getShoppingcart().getOrderLines();
+
+			for (OrderLine o : ordersLine) {
+				for (Orders ord : orders) {
+					if (ord.getOrderLine().contains(o)) {
+						p.add(o.getProduct());
+					}
+				}
+			}
+			return p;
+		}
+
+		return p;
+	}
+
+	@Override
+	public List<Product> getOrdersByShelf(long shelfId) {
+		List<OrderLine> ordersLine = new ArrayList<OrderLine>();
+		List<Product> p = new ArrayList<Product>();
+		List<Orders> orders = new ArrayList<Orders>();
+		orders = shelfRepository.getAllOrder();
+
+		ordersLine = shelfRepository.getOrderByShelf(shelfId);
+		for (OrderLine o : ordersLine) {
+			for (Orders ord : orders) {
+				if (ord.getOrderLine().contains(o)) {
+					p.add(o.getProduct());
+				}
+			}
+
+		}
+
+		return p;
+	}
+
+	@Override
+	public List<ShelfRevenu> getShelfsRevenu() {
+		List<ShelfRevenu> rev = new ArrayList<ShelfRevenu>();
+		List<Shelf> shelfs = new ArrayList<Shelf>();
+		shelfs = (List<Shelf>) shelfRepository.findAll();
+
+		for (Shelf s : shelfs) {
+			float revenu = 0;
+			ShelfRevenu sr = new ShelfRevenu();
+			List<Product> products = new ArrayList<Product>();
+			products = this.getOrdersByShelf(s.getShelfId());
+			for (Product p : products) {
+				for (OrderLine o : shelfRepository.getAllOrderLine()) {
+					if (o.getProduct().equals(p)) {
+						revenu = o.getQuantity() * p.getPriceV();
+					}
+				}
+
+			}
+
+			sr.setShelf(s.getShelfname());
+			sr.setRevenu(revenu);
+			rev.add(sr);
+		}
+
+		return rev;
+	}
+
+	// lite des vendu last 3 days
+	@Override
+	public List<Orders> getOrdersLastThreeDays() {
+		// subtract 3 days from today
+
+		Date d = new Date(System.currentTimeMillis());
+
+		Date thirtyDaysAgo = new Date(d.getTime() - (3 * 86400000));
+
+		return shelfRepository.getOrdersLastThreeDays(thirtyDaysAgo);
+
+	}
+	// liste cat last 3 days
+
+	@Override
+	public List<Product> getOrdersByCategory(long categoryId) {
+		List<OrderLine> ordersLine = new ArrayList<OrderLine>();
+		List<Product> p = new ArrayList<Product>();
+		List<Orders> orders = new ArrayList<Orders>();
+		orders = this.getOrdersLastThreeDays();
+
+		for (Orders o : orders) {
+			for (OrderLine ord : o.getOrderLine()) {
+				ordersLine.add(ord);
+			}
+		}
+
+		for (OrderLine o : ordersLine) {
+			for (Orders ord : orders) {
+				if (ord.getOrderLine().contains(o)) {
+					if(o.getProduct().getCategory().equals(categoryRepository.findById(categoryId).get()))
+					p.add(o.getProduct());
+				}
+			}
+
+		}
+
+		return p;
+	}
+
+	@Override
+	public List<CategoryRevenulastThreeDays> getCategoryLastThreeDays() {
+
+		List<Orders> orders = new ArrayList<Orders>();
+		List<Category> category = new ArrayList<Category>();
+		List<CategoryRevenulastThreeDays> catRev = new ArrayList<CategoryRevenulastThreeDays>();
+		category = shelfRepository.getAllCategory();
+		List<OrderLine> orderLines = new ArrayList<OrderLine>();
+		orders = this.getOrdersLastThreeDays();
+
+		for (Orders o : orders) {
+			for (OrderLine ord : o.getOrderLine()) {
+				orderLines.add(ord);
+			}
+		}
+	
+		for (Category c : category) {
+			float revenu = 0;
+			
+			CategoryRevenulastThreeDays cat = new CategoryRevenulastThreeDays();
+			List<Product> products = new ArrayList<Product>();
+			products=this.getOrdersByCategory(c.getCategoryId());
+			for (Product p : products) {
+				System.out.println(p.getName());
+				for (OrderLine o : orderLines) {
+					if (o.getProduct().equals(p)) {
+						revenu = o.getQuantity() * p.getPriceV();
+						cat.setRevenu(revenu);
+					}
+				}
+
+			}
+			cat.setCategoryName(c.getName());
+			
+			catRev.add(cat);
+		}
+
+		Collections.sort(catRev);
+		return catRev;
 	}
 
 	@Override
@@ -78,32 +393,6 @@ public class ShelfServiceImpl implements IShelfService {
 	@Override
 	public List<Shelf> getShelfByType(ShelfType type) {
 		return shelfRepository.findAllByType(type);
-	}
-
-	@Override
-	public void updatePositionShelById(int position, long shelfId) {
-		Shelf shelf = shelfRepository.findById(shelfId).get();
-		shelf.setPosition(position);
-		shelfRepository.save(shelf);
-	}
-
-	@Override
-	public String affecterCategoryShelf(long categoryId, long shelfId) {
-		Shelf shelf = shelfRepository.findById(shelfId).get();
-		Category category = categoryRepository.findById(categoryId).get();
-
-		if (shelf.getType() == category.getType()) {
-			category.setShelf(shelf);
-			if (shelf.getPromo() == true) {
-				for (Product p : category.getProduct()) {
-					p.setInPromo(true);
-					p.setPriceV(p.getPriceV() - (p.getPriceV() * shelf.getReduction()) / 100);
-				}
-			}
-			categoryRepository.save(category);
-			return "affecter";
-		}
-		return "impossible d'affecter";
 	}
 
 	@Override
@@ -136,13 +425,108 @@ public class ShelfServiceImpl implements IShelfService {
 
 	@Override
 	public Shelf getShelfById(long Shelfid) {
-		return shelfRepository.findById(Shelfid).get();
+
+		Shelf s = shelfRepository.findById(Shelfid).get();
+		s.calculateNewPrice();
+		return s;
+	}
+
+	// @Scheduled(cron = "*/20 * * * * *")
+	@Transactional
+	public void deleteShelfByDate() {
+		List<Shelf> shelfs = new ArrayList<Shelf>();
+		shelfs = (List<Shelf>) shelfRepository.findAll();
+		Date d = new Date(System.currentTimeMillis());
+
+		for (Shelf s : shelfs) {
+
+			if (s.getDateExpiration() != null) {
+				if (s.getDateExpiration().compareTo(d) < 0) {
+					HistoriqueShelf h = new HistoriqueShelf();
+					List<ShelfRevenu> shelfRevs = new ArrayList<ShelfRevenu>();
+
+					shelfRevs = this.getShelfsRevenu();
+
+					for (ShelfRevenu srv : shelfRevs) {
+						if (s.getShelfname().equals(srv.getShelf())) {
+							h.setName(s.getShelfname());
+							h.setMontant(srv.getRevenu());
+						}
+					}
+
+					historiqueShelfRepository.save(h);
+
+					this.DeleteShelfById(s.getShelfId());
+
+				}
+			}
+		}
+
+		System.out.println("anis");
+	}
+
+	// update de pourcentage de reduction
+
+	@Override
+	public void UpdateReductin(int red, long shelfId) {
+		shelfRepository.updateReductionPercentage(red, shelfId);
+	}
+
+	// affecter et deaffcter
+
+	@Override
+	public String affecterCategoryShelf(long categoryId, long shelfId) {
+		Shelf shelf = shelfRepository.findById(shelfId).get();
+		Category category = categoryRepository.findById(categoryId).get();
+		category.setShelf(shelf);
+
+		if (shelf.getType().equals(ShelfType.PROMO)) {
+			for (Product p : category.getProduct()) {
+				p.setInPromo(true);
+				float prix;
+				prix = p.getPriceV() - (p.getPriceV() * shelf.getReductionPercantage()) / 100;
+				if (prix < p.getPriceA()) {
+					return "il y' a perte dans vente de produit " + p.getName();
+				}
+			}
+			List<User> users = new ArrayList<User>();
+			users = userRepository.findAll();
+			/*
+			 * for(User u : users) { SmsRequest smsRequest = new
+			 * SmsRequest(u.getNumTel(),
+			 * "nouvelle promo disponible jusqu'a minuit ");
+			 * s.sendSms(smsRequest); }
+			 */
+
+		} else if (!shelf.getType().equals(ShelfType.RAMADHAN)) {
+			category.setLastShelf(shelf.getShelfId());
+		}
+		categoryRepository.save(category);
+		return "affecter";
 	}
 
 	@Override
-	public ShelfRating saveOrUpdateRating(long userId, long Shelfid, int rating) {
+	public String daffecterCategoryShelf(long categoryId, long shelfId) {
+
+		Shelf shelf = shelfRepository.findById(shelfId).get();
+		Category category = categoryRepository.findById(categoryId).get();
+
+		if (shelf.getType().equals(ShelfType.PROMO)) {
+			category.setShelf(shelfRepository.findById(category.getLastShelf()).get());
+		}
+		if (shelf.getType().equals(ShelfType.RAMADHAN)) {
+			category.setShelf(shelfRepository.findById(category.getLastShelf()).get());
+		}
+		categoryRepository.save(category);
+		return "daffecter";
+	}
+
+	// Rating
+
+	@Override
+	public ShelfRating saveOrUpdateRating(Authentication auth, long Shelfid, int rating) {
 		Shelf shelf = shelfRepository.findById(Shelfid).get();
-		User user = UserRepository.findById(userId).get();
+		User user = userRepository.findByName(auth.getName()).get();
 		List<ShelfRating> reviews = shelfRatingRepository.findByShelf(shelf);
 		ShelfRating review = new ShelfRating();
 
@@ -153,7 +537,7 @@ public class ShelfServiceImpl implements IShelfService {
 			shelfRatingRepository.save(review);
 		} else {
 			for (ShelfRating r : reviews) {
-				if (r.getUser().getUserId() == userId) {
+				if (r.getUser().getUserId() == user.getUserId()) {
 					r.setRating(rating);
 					shelfRatingRepository.save(r);
 					updateRatingById(shelf.getShelfId());
@@ -168,16 +552,6 @@ public class ShelfServiceImpl implements IShelfService {
 		}
 
 		return review;
-	}
-
-	@Override
-	public String daffecterCategoryShelf(long categoryId, long shelfId) {
-
-		Shelf shelf = shelfRepository.findById(shelfId).get();
-		Category category = categoryRepository.findById(categoryId).get();
-		category.setShelf(null);
-		categoryRepository.save(category);
-		return "daffecter";
 	}
 
 	public void updateRatingById(long shelfId) {
@@ -234,4 +608,5 @@ public class ShelfServiceImpl implements IShelfService {
 		return l2;
 
 	}
+
 }

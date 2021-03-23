@@ -22,6 +22,7 @@ public class OrderLine implements Serializable {
 	@OneToOne
 	private Product product;
 	public int quantity;
+	public float price;
 	@ManyToOne
 	private ShoppingCart shoppingCart;
 	
@@ -55,6 +56,14 @@ public class OrderLine implements Serializable {
 
 	public void setShoppingCart(ShoppingCart shoppingCart) {
 		this.shoppingCart = shoppingCart;
+	}
+
+	public float getPrice() {
+		return price;
+	}
+
+	public void setPrice(float price) {
+		this.price = price;
 	}
 
 	

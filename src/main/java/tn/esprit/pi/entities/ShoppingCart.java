@@ -13,6 +13,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class ShoppingCart implements Serializable{
 	
@@ -25,10 +27,10 @@ public class ShoppingCart implements Serializable{
 	
 	@Temporal(TemporalType.DATE)
 	private Date dateCreation;
-	
+	@JsonIgnore
 	@OneToOne
 	private User user;
-	
+	@JsonIgnore
 	@OneToMany(mappedBy="shoppingCart")
 	private List<OrderLine> orderLines;
 	

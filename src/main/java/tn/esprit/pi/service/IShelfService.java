@@ -2,16 +2,22 @@ package tn.esprit.pi.service;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
+
 import tn.esprit.pi.entities.Category;
+import tn.esprit.pi.entities.OrderLine;
+import tn.esprit.pi.entities.Orders;
 import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Shelf;
 import tn.esprit.pi.entities.ShelfRating;
 import tn.esprit.pi.entities.ShelfType;
 import tn.esprit.pi.entities.User;
+import tn.esprit.pi.payload.CategoryRevenulastThreeDays;
+import tn.esprit.pi.payload.ShelfRevenu;
 
 public interface IShelfService {
 
-	public long addShelf(Shelf shelf);
+	public String addShelf(Shelf shelf);
 
 	public Shelf updateShelf(Shelf shelf);
 
@@ -25,8 +31,6 @@ public interface IShelfService {
 
 	public List<Shelf> getShelfByType(ShelfType type);
 
-	public void updatePositionShelById(int position, long shelfId);
-
 	public String affecterCategoryShelf(long categoryId, long shelfId);
 
 	public String daffecterCategoryShelf(long categoryId, long shelfId);
@@ -37,13 +41,34 @@ public interface IShelfService {
 
 	public List<String> getAllProductByShelfJPQL(long Shelfid);
 
-	public ShelfRating saveOrUpdateRating(long userId, long Shelfid, int rating);
-	
 	public void deleteRating(long ratingId);
-	
-	  public ShelfRating getRatingbyId(long rating_id);
-	  
-	  public List<ShelfRating> getAllRating();
 
-	  public List<User> getUSersByShelf(long shelfId);
+	public ShelfRating getRatingbyId(long rating_id);
+
+	public List<ShelfRating> getAllRating();
+
+	public List<User> getUSersByShelf(long shelfId);
+
+	public ShelfRating saveOrUpdateRating(Authentication auth, long Shelfid, int rating);
+
+	public List<Shelf> getShelfs(Authentication auth);
+
+	public List<Product> getOders(Authentication auth);
+
+	public void UpdateReductin(int red ,long shelfId);
+
+	public List<Product> getOrdersByShelf(long shelfId);
+
+	public List<ShelfRevenu> getShelfsRevenu();
+
+	List<Orders> getOrdersLastThreeDays();
+
+	List<CategoryRevenulastThreeDays> getCategoryLastThreeDays();
+
+
+
+	List<Product> getOrdersByCategory(long categoryId);
+
+   
+   
 }

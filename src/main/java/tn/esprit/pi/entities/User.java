@@ -1,18 +1,25 @@
 package tn.esprit.pi.entities;
 
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class User implements Serializable {
@@ -27,12 +34,17 @@ public class User implements Serializable {
 	private String address;
 	private String email;
 	private String numTel;
+	private String sex;
+	
 	private String password;
 	private int age;
 	private boolean isConnected;
 	private boolean viewAd;
-	@Enumerated(EnumType.STRING)
-	private Role role;
+	@JsonIgnore
+    private String resetToken;
+	@ManyToMany(fetch = FetchType.LAZY,cascade= CascadeType.ALL)
+	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+	private Set<Roles> roles = new HashSet<>();
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Claim> claim;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -43,13 +55,11 @@ public class User implements Serializable {
 	private List<DiscountToken> discountToken;
 	@ManyToMany(mappedBy = "user")
 	private List<Event> event;
-	
-	@OneToOne(mappedBy="user")
+
+	@OneToOne(mappedBy = "user")
 	private ShoppingCart shoppingcart;
 
-
-	public User(long cin, String name, String address, String email, String numTel, int age, boolean isConnected,
-			boolean viewAd, Role role) {
+	public User(long cin, String name, String address, String email, String numTel, int age) {
 		super();
 		this.cin = cin;
 		this.name = name;
@@ -57,13 +67,35 @@ public class User implements Serializable {
 		this.email = email;
 		this.numTel = numTel;
 		this.age = age;
-		this.isConnected = isConnected;
-		this.viewAd = viewAd;
-		this.role = role;
+		
+
 	}
 
 	public User() {
 		super();
+	}
+
+	public User(String name2, String email2, String encode, String address2, int age2, long cin2, String numTel2,String sex ) {
+		this.name=name2;
+		this.address=address2;
+		this.age=age2;
+		this.email=email2;
+		this.numTel=numTel2;
+		this.password=encode;
+		this.cin=cin2;
+		this.sex=sex;
+	}
+	
+	
+	public User(String name2, String email2, String encode, String address2, int age2, long cin2, String numTel2 ) {
+		this.name=name2;
+		this.address=address2;
+		this.age=age2;
+		this.email=email2;
+		this.numTel=numTel2;
+		this.password=encode;
+		this.cin=cin2;
+		
 	}
 
 	public long getUserId() {
@@ -138,12 +170,12 @@ public class User implements Serializable {
 		this.viewAd = viewAd;
 	}
 
-	public Role getRole() {
-		return role;
+	public Set<Roles> getRoles() {
+		return roles;
 	}
 
-	public void setRole(Role role) {
-		this.role = role;
+	public void setRoles(Set<Roles> roles) {
+		this.roles = roles;
 	}
 
 	public List<Claim> getClaim() {
@@ -202,4 +234,22 @@ public class User implements Serializable {
 		this.password = password;
 	}
 
+	public String getResetToken() {
+		return resetToken;
+	}
+
+	public void setResetToken(String resetToken) {
+		this.resetToken = resetToken;
+	}
+
+	public String getSex() {
+		return sex;
+	}
+
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+
+	
+	
 }

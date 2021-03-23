@@ -1,10 +1,8 @@
 package tn.esprit.pi.entities;
-
 import java.io.Serializable;
-
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,9 +16,7 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 
 @Entity
 public class Shelf implements Serializable {
@@ -30,29 +26,30 @@ public class Shelf implements Serializable {
 	@Id
 	private long ShelfId;
 	private String Shelfname;
-	@Column(unique=true)
-	private int position;
+	@JsonIgnore
 	@Temporal(TemporalType.DATE)
 	private Date dateCreation = new Date(System.currentTimeMillis());
+
+	@Temporal(TemporalType.DATE)
+	private Date dateExpiration;
 	@Enumerated(EnumType.STRING)
 	private ShelfType type;
 	private String image;
-	@JsonIgnore
 	@OneToMany(mappedBy = "shelf")
 	private List<Category> category;
 	@NotNull(message = "Please specify a rating between 1 and 5 inclusive")
-    @Min(value = 1, message = "Please enter a rating greater than 0")
-    @Max(value = 5, message = "Please enter a rating lesser than 5")
-    private int rating;
-    @Column(columnDefinition = "boolean default false")
-    private Boolean promo =false;
+	@Min(value = 1, message = "Please enter a rating greater than 0")
+	@Max(value = 5, message = "Please enter a rating lesser than 5")
+	private float rating;
+	@Column(columnDefinition = "boolean default false")
+	private Boolean promo = false;
 	@Column(columnDefinition = "integer default 0")
-    private int reductionPercantage;
-	public Shelf(String shelfname, int position, Date dateCreation, ShelfType type, String image,
-			List<Category> category) {
+	private int reductionPercantage;
+
+	
+	public Shelf(String shelfname, Date dateCreation, ShelfType type, String image, List<Category> category) {
 		super();
 		Shelfname = shelfname;
-		this.position = position;
 		this.dateCreation = dateCreation;
 		this.type = type;
 		this.category = category;
@@ -77,14 +74,6 @@ public class Shelf implements Serializable {
 
 	public void setShelfname(String shelfname) {
 		Shelfname = shelfname;
-	}
-
-	public int getPosition() {
-		return position;
-	}
-
-	public void setPosition(int position) {
-		this.position = position;
 	}
 
 	public Date getDateCreation() {
@@ -119,11 +108,11 @@ public class Shelf implements Serializable {
 		this.image = image;
 	}
 
-	public int getRating() {
+	public float getRating() {
 		return rating;
 	}
 
-	public void setRating(int rating) {
+	public void setRating(float rating) {
 		this.rating = rating;
 	}
 
@@ -135,13 +124,39 @@ public class Shelf implements Serializable {
 		this.promo = promo;
 	}
 
-	public int getReduction() {
+	public int getReductionPercantage() {
 		return reductionPercantage;
 	}
 
-	public void setReduction(int reductionPercantage) {
+	public void setReductionPercantage(int reductionPercantage) {
 		this.reductionPercantage = reductionPercantage;
 	}
+
 	
+	public Date getDateExpiration() {
+		return dateExpiration;
+	}
+
+	public void setDateExpiration(Date dateExpiration) {
+		this.dateExpiration = dateExpiration;
+	}
+
+	public Shelf calculateNewPrice() {
+		List<Category> categories = new ArrayList<Category>();
+		categories = this.getCategory();
+		if (this.getType().equals(ShelfType.PROMO)) {
+			for (Category c : categories) {
+				for (Product p : c.getProduct()) {
+					p.setPriceV(p.getPriceV() - (p.getPriceV() * this.getReductionPercantage()) / 100);
+					p.setInPromo(true);
+					System.out.println(p.getPriceV());
+				}
+			}
+			this.setCategory(categories);
+		
+			return this;
+		}
+		return this;
+	}
 
 }

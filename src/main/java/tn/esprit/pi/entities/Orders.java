@@ -25,7 +25,7 @@ public class Orders implements Serializable {
 	private long orderId;
 
 	@Temporal(TemporalType.DATE)
-	private Date eventDate;
+	private Date orderDate;
 
 	@OneToOne(mappedBy = "order")
 	private Delivery delivery;
@@ -39,9 +39,9 @@ public class Orders implements Serializable {
 		super();
 	}
 
-	public Orders(Date eventDate) {
+	public Orders(Date orderDate) {
 		super();
-		this.eventDate = eventDate;
+		this.orderDate = orderDate;
 	}
 
 	public long getOrderId() {
@@ -52,12 +52,12 @@ public class Orders implements Serializable {
 		this.orderId = orderId;
 	}
 
-	public Date getEventDate() {
-		return eventDate;
+	public Date getOrderDate() {
+		return orderDate;
 	}
 
-	public void setEventDate(Date eventDate) {
-		this.eventDate = eventDate;
+	public void setOrderDate(Date eventDate) {
+		this.orderDate = eventDate;
 	}
 
 	public Delivery getDelivery() {

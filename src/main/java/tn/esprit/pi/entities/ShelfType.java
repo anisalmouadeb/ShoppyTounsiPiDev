@@ -1,6 +1,5 @@
 package tn.esprit.pi.entities;
 
 public enum ShelfType {
-	FRIDGE,NORMAL
-
+	ALL,PROMO,RAMADHAN,FEMME,HOMME,ENFANT
 }

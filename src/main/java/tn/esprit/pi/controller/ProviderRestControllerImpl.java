@@ -3,6 +3,7 @@ package tn.esprit.pi.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +22,9 @@ public class ProviderRestControllerImpl {
 	@Autowired
 	IproviderService iProviderService;
 
+	
 	@PostMapping("/addProvider")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public Provider addProvider(@RequestBody Provider provider) {
 		iProviderService.addProvider(provider);
@@ -29,6 +32,7 @@ public class ProviderRestControllerImpl {
 	}
 
 	@DeleteMapping("/deleteProviderById/{idProvider}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public void deleteProviderById(@PathVariable("idProvider") long providerId) {
 		iProviderService.DeleteProviderById(providerId);
@@ -36,6 +40,7 @@ public class ProviderRestControllerImpl {
 	}
 
 	@GetMapping(value = "/getAllProviders")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Provider> getAllProviders() {
 
@@ -43,6 +48,7 @@ public class ProviderRestControllerImpl {
 	}
 
 	@GetMapping(value = "/getProviderById/{idProvider}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public Provider getProviderById(@PathVariable("idProvider") long providerId) {
 
@@ -50,6 +56,7 @@ public class ProviderRestControllerImpl {
 	}
 	
 	@PutMapping("/updateProvider")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public Provider updateShelf(@RequestBody Provider provider) {
 		iProviderService.updateProvider(provider);
