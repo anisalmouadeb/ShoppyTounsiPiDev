@@ -29,6 +29,7 @@ public class Product implements Serializable {
 	private float priceA;
 	private int quantity;
 	private long code;
+	@JsonIgnore
 	@ManyToOne
 	private Category category;
 	private boolean inPromo;

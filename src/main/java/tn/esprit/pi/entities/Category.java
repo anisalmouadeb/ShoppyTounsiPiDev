@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Category implements Serializable {
 
@@ -25,8 +27,11 @@ public class Category implements Serializable {
 	private List<Product> product;
 	@Enumerated(EnumType.STRING)
 	private ShelfType type;
+	@JsonIgnore
 	@ManyToOne 
 	private Shelf shelf;
+	@JsonIgnore
+	private long LastShelf;
 	public Category(String name, List<Product> product, ShelfType type, Shelf shelf) {
 		super();
 		this.name = name;
@@ -39,8 +44,6 @@ public class Category implements Serializable {
 		super();
 	}
 	
-	
-
 	public Shelf getShelf() {
 		return shelf;
 	}
@@ -79,6 +82,14 @@ public class Category implements Serializable {
 
 	public void setType(ShelfType type) {
 		this.type = type;
+	}
+
+	public long getLastShelf() {
+		return LastShelf;
+	}
+
+	public void setLastShelf(long lastShelf) {
+		LastShelf = lastShelf;
 	}
 
 }

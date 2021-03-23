@@ -2,8 +2,8 @@ package tn.esprit.pi.controller;
 
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,13 +21,11 @@ import tn.esprit.pi.service.IStockService;
 @RestController
 public class StockRestControllerImpl {
 
-
-
 	@Autowired
 	IStockService iStockService;
 
-
-	@GetMapping(value = "getListMissingProduct")
+	@GetMapping(value = "/getListMissingProduct")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Product> getListMissigProduct() {
 
@@ -35,6 +33,7 @@ public class StockRestControllerImpl {
 	}
 
 	@PostMapping("/addEntry")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public String addEntry(@RequestBody Entry entry) {
 		iStockService.addEntry(entry);
@@ -42,15 +41,16 @@ public class StockRestControllerImpl {
 	}
 
 	@DeleteMapping("/deleteEntryById/{identry}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public String deleteEntryById(@PathVariable("identry") long entryId) {
-		
-		
+
 		return iStockService.deleteEntry(entryId);
 
 	}
 
 	@GetMapping(value = "/getAllEntry")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Entry> getAllEntrys() {
 
@@ -58,33 +58,37 @@ public class StockRestControllerImpl {
 	}
 
 	@GetMapping(value = "/getEntryById/{identry}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public Entry getEntryById(@PathVariable("identry") long entryId) {
 
-		if(iStockService.getEntryById(entryId)==null)
-		{}
-		
+		if (iStockService.getEntryById(entryId) == null) {
+		}
+
 		return iStockService.getEntryById(entryId);
 
 	}
 
 	@GetMapping(value = "getEntryByProduct/{productId}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Entry> getAllEntryByProduct(@PathVariable("productId") long productId) {
 		return iStockService.getEntryByProduct(productId);
 	}
 
 	@GetMapping(value = "getEntryByProvider/{providerId}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Entry> getAllEntryByProvider(@PathVariable("providerId") long providerId) {
 		return iStockService.getEntryByProvider(providerId);
 	}
 
 	@GetMapping(value = "getNomberEntryProvider/{providerId}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public int getNomberEntryProvider(@PathVariable("providerId") long providerId){
+	public int getNomberEntryProvider(@PathVariable("providerId") long providerId) {
 
 		return iStockService.getNomberProvider(providerId);
 	}
-	
+
 }
