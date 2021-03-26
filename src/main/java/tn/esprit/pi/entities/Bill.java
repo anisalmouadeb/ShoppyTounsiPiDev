@@ -22,7 +22,7 @@ public class Bill implements Serializable{
 	@Temporal(TemporalType.DATE)
 	private Date billDate;
 	@OneToOne
-	private Order order;
+	private Orders order;
 	private int amount ;
 	
 	
@@ -41,10 +41,10 @@ public class Bill implements Serializable{
 	public void setBillDate(Date billDate) {
 		this.billDate = billDate;
 	}
-	public Order getOrder() {
+	public Orders getOrder() {
 		return order;
 	}
-	public void setOrder(Order order) {
+	public void setOrder(Orders order) {
 		this.order = order;
 	}
 	public int getAmount() {
