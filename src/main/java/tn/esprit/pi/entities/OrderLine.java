@@ -23,6 +23,15 @@ public class OrderLine implements Serializable {
 	private Product product;
 	public int quantity;
 	public float price;
+	public Boolean confirmed;
+	public Boolean getConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(Boolean confirmed) {
+		this.confirmed = confirmed;
+	}
+
 	@ManyToOne
 	private ShoppingCart shoppingCart;
 	

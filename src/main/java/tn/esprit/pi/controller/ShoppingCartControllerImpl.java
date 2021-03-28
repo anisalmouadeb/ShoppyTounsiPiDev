@@ -62,6 +62,12 @@ public class ShoppingCartControllerImpl {
 		return ShoppingCartService.getShoppingCartProducts(ShoppingCartId);
 	}
 	
+	@GetMapping(value = "getTotalAmount/{ShoppingCartId}")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	@ResponseBody
+	public float getTotalAmount(@PathVariable("ShoppingCartId") Long ShoppingCartId) {
+		return ShoppingCartService.getTotalAmount(ShoppingCartId);
+	}
 	
 
 }

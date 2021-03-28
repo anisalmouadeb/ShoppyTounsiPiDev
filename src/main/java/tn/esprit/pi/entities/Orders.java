@@ -34,6 +34,15 @@ public class Orders implements Serializable {
 
 	@OneToMany
 	private List<OrderLine> orderLine;
+	public Boolean confirmedPayment;
+
+	public Boolean getConfirmedPayment() {
+		return confirmedPayment;
+	}
+
+	public void setConfirmedPayment(Boolean confirmedPayment) {
+		this.confirmedPayment = confirmedPayment;
+	}
 
 	public Orders() {
 		super();

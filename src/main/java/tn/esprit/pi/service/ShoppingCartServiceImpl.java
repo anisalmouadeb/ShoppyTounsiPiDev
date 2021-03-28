@@ -1,5 +1,6 @@
 package tn.esprit.pi.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class ShoppingCartServiceImpl implements IShoppingCartService {
 				o.setShoppingCart(s);
 			}
 		}
+		o.setConfirmed(false);
 		ShoppingCartRepo.save(s);
 		OrderLineRepo.save(o);
 		return "Added OrderLines To Cart";
@@ -80,6 +82,19 @@ public class ShoppingCartServiceImpl implements IShoppingCartService {
 		}
 
 		return pnames;
+
+	}
+
+	@Override
+	public float getTotalAmount(long ShoppingCartId) {
+		ShoppingCart s = ShoppingCartRepo.findById(ShoppingCartId).get();
+		float totalAmount=0;
+		
+		for (OrderLine ol : s.getOrderLines()) {
+			totalAmount = totalAmount+ol.getPrice();
+		}
+
+		return totalAmount;
 
 	}
 }

@@ -1,5 +1,6 @@
 package tn.esprit.pi.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import tn.esprit.pi.entities.OrderLine;
@@ -21,6 +22,8 @@ public interface IShoppingCartService {
 	public List<OrderLine> getAllOrderLinesByShoppingCart(long ShoppingCartId);
 
 	public List<String> getShoppingCartProducts(long ShoppingCartId);
+
+	public float getTotalAmount(long ShoppingCartId);
 
 
 
