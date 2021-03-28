@@ -1,20 +1,24 @@
 package tn.esprit.pi.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
-
 import tn.esprit.pi.configuration.EmailConfig;
 import tn.esprit.pi.entities.Entry;
+import tn.esprit.pi.entities.MailHistory;
+import tn.esprit.pi.entities.OrderLine;
+import tn.esprit.pi.entities.Orders;
 import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Provider;
 import tn.esprit.pi.repository.EntryRepository;
+import tn.esprit.pi.repository.MailHistoryRepository;
 import tn.esprit.pi.repository.ProductRepository;
 import tn.esprit.pi.repository.ProviderRepository;
-
 @Service
 public class StockServiceImpl implements IStockService {
 	
@@ -26,6 +30,8 @@ public class StockServiceImpl implements IStockService {
 	
 	@Autowired
 	ProductRepository productRepository;
+	@Autowired
+	MailHistoryRepository mailHistoryRepo;
 	@Autowired
 	EntryRepository entryRepository;
 	@Autowired
@@ -46,7 +52,7 @@ public class StockServiceImpl implements IStockService {
 		int quantity = entry.getQuantity();
 		product.setQuantity(product.getQuantity()+quantity);
 		
-		float m=entry.getQuantity()*product.getPriceA()+provider.getDeleviryFees();
+		float m=entry.getQuantity()*entry.getArticalPrice()+provider.getDeleviryFees();
 		
 		if(entryRepository.NbEntryProvider(provider.getProviderId())>=3||m>=provider.getSeuilMontant())
 		{
@@ -55,7 +61,8 @@ public class StockServiceImpl implements IStockService {
 		}
 		
 		entry.setMontant(m);
-		
+		product.setPriceA(m/entry.getQuantity());
+		productRepository.save(product);
         entryRepository.save(entry);
 		return entry.getEntryId();
 	}
@@ -96,4 +103,76 @@ public class StockServiceImpl implements IStockService {
 	return entryRepository.NbEntryProvider(providerId);
 	}
 	
+	@Override
+	public List<Provider> getProviderByProduct(long productId)
+	{
+		List<Provider> providers = new ArrayList<Provider>();
+		providers= entryRepository.getProviderByProduct(productId);
+		return providers;
+	}
+
+	public int getLastSevenDaysQuantity(long productId)
+	{   Product p = productRepository.findById(productId).get();
+		int nb=0;
+		List<OrderLine> ordersLine = new ArrayList<OrderLine>();
+		List<Orders> orders= new ArrayList<Orders>();
+		Date d = new Date(System.currentTimeMillis());
+		Date sevenDaysAgo = new Date(d.getTime() - (604800000));
+		System.out.println(d);
+		System.out.println(sevenDaysAgo);	
+		orders =  entryRepository.getOrdersLastThreeDays(sevenDaysAgo);
+		ordersLine = entryRepository.getAllOrderLine();
+	 for (Orders o : orders)
+	 {
+		 for(OrderLine ord :o.getOrderLine())
+		 {
+			 if(ord.getProduct()==p)
+			 {
+				 nb=nb+ord.getQuantity();
+			 }
+		 }
+	 }
+		
+		return nb;
+	}
+	@Override
+	public void NotifyProvider(long productId) {
+		List<Provider> provs = this.getProviderByProduct(productId)	;
+		Product product = productRepository.findById(productId).get();
+		for(Provider p : provs)
+		{
+			if(p.getDisponibility()==false)
+			provs.remove(p);
+		}
+		Collections.sort(provs);
+        int q= this.getLastSevenDaysQuantity(productId);
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+		mailSender.setHost(this.emailCfg.getHost());
+		mailSender.setPort(this.emailCfg.getPort());
+		mailSender.setUsername(this.emailCfg.getUsername());
+		mailSender.setPassword(this.emailCfg.getPassword());
+		// Create an email instance
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setFrom("ShoppyTounsi@Gmail.com");
+		mailMessage.setTo(provs.get(0).getEmail());
+		mailMessage.setSubject("New order for "+product.getName());
+		mailMessage.setText("Hi "+provs.get(0).getName()+" we need "+q+ " from "+product.getName());
+		// Send mail
+		mailSender.send(mailMessage);	
+		Date d = new Date(System.currentTimeMillis());
+		MailHistory m = new MailHistory();
+		m.setDistination(provs.get(0).getEmail());
+		m.setBody("Hi "+provs.get(0).getName()+" we need "+q+ " from "+product.getName());
+		m.setSendDate(d);
+		m.setType("provider");
+		mailHistoryRepo.save(m);
+	
+	}
+
+	@Override
+	public int getSumOutlay() {
+		return entryRepository.getSumOutlay();
+	}
+	
+
 }

@@ -41,7 +41,7 @@ public interface IShelfService {
 
 	public List<String> getAllProductByShelfJPQL(long Shelfid);
 
-	public void deleteRating(long ratingId);
+	public void deleteRating(long userId ,long shelfId);
 
 	public ShelfRating getRatingbyId(long rating_id);
 

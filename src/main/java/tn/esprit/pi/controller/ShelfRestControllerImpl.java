@@ -2,6 +2,7 @@ package tn.esprit.pi.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -32,6 +33,9 @@ import tn.esprit.pi.payload.MessageResponse;
 import tn.esprit.pi.payload.ShelfRevenu;
 import tn.esprit.pi.repository.ProductRepository;
 import tn.esprit.pi.repository.ShelfRepository;
+import tn.esprit.pi.repository.UserRepository;
+import tn.esprit.pi.security.SharedLogg;
+import tn.esprit.pi.security.UserDetailsImpl;
 import tn.esprit.pi.service.IShelfService;
 
 @RestController
@@ -43,6 +47,8 @@ public class ShelfRestControllerImpl {
 	ShelfRepository shelfRepo;
 	@Autowired
 	ProductRepository productRepository;
+	@Autowired
+	UserRepository userRepository;
 
 	// {"shelfId":1,"shelfname":"name222", "dateCreation":"2021-02-27",
 	// "position":3,"type":"NORMAL","image":"iamg22"}
@@ -59,11 +65,14 @@ public class ShelfRestControllerImpl {
 			}
 		}
 		if(shelf.getType().equals(ShelfType.PROMO))	
+		{
+			if(shelf.getReductionPercantage()==0)
+				return ResponseEntity.badRequest().body(new MessageResponse("Add reduction percentage"));
 		for (Shelf s : shelfs) {
 		if (s.getType().equals(ShelfType.PROMO)) {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: promo is already exist!"));
 		}
-
+		}
 		}
 		
 		 ishelfService.addShelf(shelf);
@@ -96,13 +105,14 @@ public class ShelfRestControllerImpl {
 		return ishelfService.getAllShelfs();
 	}
 
-	
+	@PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")	
 	@GetMapping(value = "/getShelfs")
 	
 	@ResponseBody
 	public List<Shelf> getShelfs(Authentication auth) {
-
-	
+		
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+			SharedLogg.addlog("shelf", "select",userDetails);	
 		return ishelfService.getShelfs(auth);
 	}
 	
@@ -111,9 +121,13 @@ public class ShelfRestControllerImpl {
 	@GetMapping(value = "/getShelfById/{idshelf}")
 	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
-	public Shelf getShelfById(@PathVariable("idshelf") long shelfId) {
+	public ResponseEntity<?> getShelfById(@PathVariable("idshelf") long shelfId) {
 
-		return ishelfService.getShelfById(shelfId);
+		Optional<Shelf> shelf = shelfRepo.findById(shelfId);
+		if (shelf ==null)
+		return  ResponseEntity.badRequest().body("not exist");
+		
+		return ResponseEntity.ok(shelf);
 	}
 
 	@GetMapping(value = "getNombreShelf")
@@ -186,10 +200,11 @@ public class ShelfRestControllerImpl {
 		return ishelfService.daffecterCategoryShelf(categoryId, shelfId);
 	}
 
-	@DeleteMapping("/deleteShelfRating/{ratingId}")
+	@DeleteMapping("/deleteShelfRating/{shelfId}")
 	@PreAuthorize("hasRole('CLIENT')")
-	public void deleteRating(@PathVariable("ratingId") int ratingId) {
-		ishelfService.deleteRating(ratingId);
+	public void deleteRating( Authentication auth, @PathVariable("shelfId")long shelfId) {
+		User u = userRepository.findByName(auth.getName()).get();
+		ishelfService.deleteRating(u.getUserId(),shelfId);
 	}
 
 	@GetMapping(value = "getAllRating")
@@ -229,7 +244,7 @@ public class ShelfRestControllerImpl {
 	
 		if(shelf.getType().equals(ShelfType.PROMO)==false)
 		{
-		return	ResponseEntity.badRequest().body("impossible ");
+		return	ResponseEntity.badRequest().body("this shelf is not a promo shelf ");
 		
 		}
 		List<Product> products =new ArrayList<Product>();
@@ -246,9 +261,11 @@ public class ShelfRestControllerImpl {
 			float prix =p.getPriceV() + (p.getPriceV() * shelf.getReductionPercantage()) / 100;
 			float nvPrix =prix - (p.getPriceV() * red) / 100;
 			if(nvPrix <p.getPriceA())
-			{
-				ResponseEntity.badRequest().body("impossible il y a une perte dans vente de produit "+p.getName());
+			{ 
+				return ResponseEntity.badRequest().body("impossible il y a une perte dans vente de produit "+p.getName());
 			}
+			System.out.println(prix);
+			System.out.println(nvPrix);
 			p.setPriceV(nvPrix);
 		    productRepository.save(p);	
 		}	
@@ -257,6 +274,7 @@ public class ShelfRestControllerImpl {
 	}	
 
 	@GetMapping(value = "getOrdersByShelf/{idshelf}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Product> getOrdersByShelf(@PathVariable("idshelf") long idshelf) {
 		return ishelfService.getOrdersByShelf(idshelf);
@@ -264,24 +282,28 @@ public class ShelfRestControllerImpl {
 
 
 	@GetMapping(value = "getShelfRevenu")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<ShelfRevenu> getShelfsRevenu() {
 		return ishelfService.getShelfsRevenu();
 	}
 
 	@GetMapping(value = "getOrdersLastThreeDays")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Orders> getOrdersLastThreeDays() {
 		return ishelfService.getOrdersLastThreeDays();
 	}
 	
 	@GetMapping(value = "getOrdersByCategory/{catid}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Product> getOrdersByCategory(@PathVariable("catid") long catId) {
 		return ishelfService.getOrdersByCategory(catId);
 	}
 	
 	@GetMapping(value = "getCategoryRevenu")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<CategoryRevenulastThreeDays> getCategoryRevenu() {
 		return ishelfService.getCategoryLastThreeDays();

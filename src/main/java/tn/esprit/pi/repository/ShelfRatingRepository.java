@@ -24,5 +24,8 @@ public interface ShelfRatingRepository extends CrudRepository<ShelfRating, Long>
 	
 	@Query("SELECT sum(s.rating) FROM  ShelfRating s where s.shelf.ShelfId=:id ")
     public int sumshelfRate(@Param("id") long Shelfid);
+	
+	@Query("SELECT s FROM  ShelfRating s where s.shelf.ShelfId=:shelfId and s.user.userId=:userId ")
+    public ShelfRating getRatingByUserAndShelf(@Param("userId") long userId ,@Param("shelfId")long Shelfid);
 
 }

@@ -52,10 +52,15 @@ public class ShelfServiceImpl implements IShelfService {
 	@Autowired
 	ServiceT s;
 
+
 	@Override
 	public String addShelf(Shelf shelf) {
 
 		if (shelf.getType().equals(ShelfType.PROMO)) {
+			if(shelf.getReductionPercantage()==0)
+			{
+				
+			}
 			shelf.setDateExpiration(new Date(System.currentTimeMillis()));
 			List<CategoryRevenulastThreeDays> cat= new ArrayList<CategoryRevenulastThreeDays>();
 			cat=this.getCategoryLastThreeDays();
@@ -66,6 +71,14 @@ public class ShelfServiceImpl implements IShelfService {
 			System.out.println(category.getName());
 			shelfRepository.save(shelf);
 			this.affecterCategoryShelf(category.getCategoryId(), shelf.getShelfId());
+			List<User> users = new ArrayList<User>();
+			users = userRepository.findAll();
+			/*
+			 * for(User u : users) { SmsRequest smsRequest = new
+			 * SmsRequest(u.getNumTel(),
+			 * "nouvelle promo disponible jusqu'a minuit ");
+			 * s.sendSms(smsRequest); }
+			 */
 		}
 		if (shelf.getType().equals(ShelfType.RAMADHAN)) {
 			Date d = new Date(System.currentTimeMillis());
@@ -88,11 +101,26 @@ public class ShelfServiceImpl implements IShelfService {
 			for (Product p : cat.getProduct()) {
 				p.setInPromo(false);
 				p.setPriceV(p.getPriceV() + (p.getPriceV() * shelf.getReductionPercantage()) / 100);
-
+                productRepository.save(p);
 			}
 			cat.setShelf(null);
 
 		}
+		
+		HistoriqueShelf h = new HistoriqueShelf();
+		List<ShelfRevenu> shelfRevs = new ArrayList<ShelfRevenu>();
+
+		shelfRevs = this.getShelfsRevenu();
+
+		for (ShelfRevenu srv : shelfRevs) {
+			if (shelf.getShelfname().equals(srv.getShelf())) {
+				h.setName(shelf.getShelfname());
+				h.setMontant(srv.getRevenu());
+			}
+		}
+
+		historiqueShelfRepository.save(h);
+
 		shelfRepository.delete(shelf);
 		return "supprimer avec succ";
 	}
@@ -142,6 +170,7 @@ public class ShelfServiceImpl implements IShelfService {
 						occ++;
 					}
 				}
+				System.out.println(occ);
 				sho.setOcc(occ);
 				sho.setShelf(s);
 				shelfocc.add(sho);
@@ -258,16 +287,20 @@ public class ShelfServiceImpl implements IShelfService {
 	@Override
 	public List<Product> getOrdersByShelf(long shelfId) {
 		List<OrderLine> ordersLine = new ArrayList<OrderLine>();
+		Shelf shelf = shelfRepository.findById(shelfId).get();
 		List<Product> p = new ArrayList<Product>();
 		List<Orders> orders = new ArrayList<Orders>();
 		orders = shelfRepository.getAllOrder();
-
+		
 		ordersLine = shelfRepository.getOrderByShelf(shelfId);
 		for (OrderLine o : ordersLine) {
 			for (Orders ord : orders) {
+				if(ord.getOrderDate().compareTo(shelf.getDateCreation())>0)
+                {
 				if (ord.getOrderLine().contains(o)) {
 					p.add(o.getProduct());
 				}
+                 }
 			}
 
 		}
@@ -289,7 +322,8 @@ public class ShelfServiceImpl implements IShelfService {
 			for (Product p : products) {
 				for (OrderLine o : shelfRepository.getAllOrderLine()) {
 					if (o.getProduct().equals(p)) {
-						revenu = o.getQuantity() * p.getPriceV();
+						revenu = revenu + o.getQuantity() * o.getPrice();
+						
 					}
 				}
 
@@ -299,7 +333,7 @@ public class ShelfServiceImpl implements IShelfService {
 			sr.setRevenu(revenu);
 			rev.add(sr);
 		}
-
+Collections.sort(rev);
 		return rev;
 	}
 
@@ -369,7 +403,7 @@ public class ShelfServiceImpl implements IShelfService {
 				System.out.println(p.getName());
 				for (OrderLine o : orderLines) {
 					if (o.getProduct().equals(p)) {
-						revenu = o.getQuantity() * p.getPriceV();
+						revenu =revenu + o.getQuantity() * o.getPrice();
 						cat.setRevenu(revenu);
 					}
 				}
@@ -442,20 +476,7 @@ public class ShelfServiceImpl implements IShelfService {
 
 			if (s.getDateExpiration() != null) {
 				if (s.getDateExpiration().compareTo(d) < 0) {
-					HistoriqueShelf h = new HistoriqueShelf();
-					List<ShelfRevenu> shelfRevs = new ArrayList<ShelfRevenu>();
-
-					shelfRevs = this.getShelfsRevenu();
-
-					for (ShelfRevenu srv : shelfRevs) {
-						if (s.getShelfname().equals(srv.getShelf())) {
-							h.setName(s.getShelfname());
-							h.setMontant(srv.getRevenu());
-						}
-					}
-
-					historiqueShelfRepository.save(h);
-
+			
 					this.DeleteShelfById(s.getShelfId());
 
 				}
@@ -469,6 +490,7 @@ public class ShelfServiceImpl implements IShelfService {
 
 	@Override
 	public void UpdateReductin(int red, long shelfId) {
+		
 		shelfRepository.updateReductionPercentage(red, shelfId);
 	}
 
@@ -488,16 +510,10 @@ public class ShelfServiceImpl implements IShelfService {
 				if (prix < p.getPriceA()) {
 					return "il y' a perte dans vente de produit " + p.getName();
 				}
+				p.setPriceV(prix);
+				productRepository.save(p);
 			}
-			List<User> users = new ArrayList<User>();
-			users = userRepository.findAll();
-			/*
-			 * for(User u : users) { SmsRequest smsRequest = new
-			 * SmsRequest(u.getNumTel(),
-			 * "nouvelle promo disponible jusqu'a minuit ");
-			 * s.sendSms(smsRequest); }
-			 */
-
+		
 		} else if (!shelf.getType().equals(ShelfType.RAMADHAN)) {
 			category.setLastShelf(shelf.getShelfId());
 		}
@@ -513,6 +529,12 @@ public class ShelfServiceImpl implements IShelfService {
 
 		if (shelf.getType().equals(ShelfType.PROMO)) {
 			category.setShelf(shelfRepository.findById(category.getLastShelf()).get());
+			for(Product p : category.getProduct())
+			{
+			p.setInPromo(false);
+			p.setPriceV(p.getPriceV() + (p.getPriceV() * shelf.getReductionPercantage()) / 100);
+            productRepository.save(p);
+			}
 		}
 		if (shelf.getType().equals(ShelfType.RAMADHAN)) {
 			category.setShelf(shelfRepository.findById(category.getLastShelf()).get());
@@ -561,15 +583,14 @@ public class ShelfServiceImpl implements IShelfService {
 	}
 
 	@Override
-	public void deleteRating(long ratingId) {
-
-		ShelfRating r = shelfRatingRepository.findById(ratingId).get();
-		Shelf shelf = r.getShelf();
+	public void deleteRating(long userId  ,long shelfId) {
+		Shelf shelf = shelfRepository.findById(shelfId).get();
+		User u = userRepository.findById(userId).get();
+		ShelfRating r = shelfRatingRepository.getRatingByUserAndShelf(u.getUserId(),shelfId);
 		r.setShelf(null);
 		r.setUser(null);
-		shelfRatingRepository.deleteById(ratingId);
+		shelfRatingRepository.deleteById(r.getRatingId());
 		updateRatingById(shelf.getShelfId());
-
 	}
 
 	@Override
@@ -600,7 +621,6 @@ public class ShelfServiceImpl implements IShelfService {
 				l3.add(s);
 			}
 		}
-
 		for (ShelfRating s : l3) {
 			l2.add(s.getUser());
 		}
