@@ -13,7 +13,7 @@ import javax.persistence.OneToMany;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class Provider implements Serializable {
+public class Provider implements Serializable , Comparable<Provider>{
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,6 +26,7 @@ public class Provider implements Serializable {
 	private float deleviryFees;
 	private float seuilMontant;
 	private int reductionPercentage;
+	private Boolean Disponibility=true;
 	@JsonIgnore
 	@OneToMany(mappedBy = "provider",cascade=CascadeType.ALL)
 	private List<Entry> entry;
@@ -104,6 +105,20 @@ public class Provider implements Serializable {
 
 	public void setEntry(List<Entry> entry) {
 		this.entry = entry;
+	}
+	public Boolean getDisponibility() {
+		return Disponibility;
+	}
+	public void setDisponibility(Boolean disponibility) {
+		Disponibility = disponibility;
+	}
+	@Override
+	public int compareTo(Provider o) {
+		if(this.getSeuilMontant()==o.getSeuilMontant())
+		{
+			return -(this.getReductionPercentage() - o.getReductionPercentage());
+		}
+		return (int) -(this.getSeuilMontant()-o.getSeuilMontant());
 	}
 
 

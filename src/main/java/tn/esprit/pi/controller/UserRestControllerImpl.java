@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import tn.esprit.pi.entities.Tokens;
 import tn.esprit.pi.entities.User;
 import tn.esprit.pi.payload.JwtResponse;
 import tn.esprit.pi.payload.MessageResponse;
+import tn.esprit.pi.repository.TokenReopsitory;
 import tn.esprit.pi.repository.UserRepository;
 import tn.esprit.pi.security.JwtUtils;
 import tn.esprit.pi.security.UserDetailsImpl;
@@ -31,7 +34,8 @@ public class UserRestControllerImpl {
 	AuthenticationManager authenticationManager;
 	@Autowired
 	IUserService iUserService;
-
+	@Autowired
+	TokenReopsitory tokenReopsitory;
 	@Autowired
 	UserRepository userRepository;
 	@Autowired
@@ -45,13 +49,24 @@ public class UserRestControllerImpl {
 		return iUserService.getAllUsers();
 	}
 
+	@GetMapping("/getMyInfo")
+	@PreAuthorize("hasRole('ADMIN')or hasRole('CLIENT')")
+	@ResponseBody
+	public User getMyInfo(Authentication auth) {
+
+		return iUserService.getMyInfo(auth);
+	}
+	
+	
+	
+	
 	@DeleteMapping("/deleteUserById/{iduser}")
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public String deleteEntryById(@PathVariable("iduser") long userId) {
+	public String deleteUserById(@PathVariable("iduser") long userId) {
 		
 		
-
+		 iUserService.setTokenToBlackList(userId);
 		return iUserService.deleteUserById(userId);
 
 	}
@@ -77,7 +92,7 @@ public class UserRestControllerImpl {
 		User user = iUserService.updateUser(u, auth);
 
 		System.out.println(user.getPassword());
-		
+		System.out.println(user.getName());
 		Authentication authentication = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(user.getName(), u.getPassword()));
 
@@ -87,11 +102,42 @@ public class UserRestControllerImpl {
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
-
+		 iUserService.setTokenToBlackList(user.getUserId());
+			Tokens t = new Tokens();
+			t.setName(jwt);
+			t.setUserId(user.getUserId());
+			tokenReopsitory.save(t);
 		return ResponseEntity.ok(
 				new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
-
+	
 	
 	}
+	@GetMapping(value = "/getRoleById/{iduser}")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody	
+		public List<String> getRoleById(@PathVariable("iduser") long userId) {
+			
+			
+			 return iUserService.getRoleById(userId);
+
+		}
+	@GetMapping(value = "/getConnctedUsers")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody	
+		public List<User> getConnctedUsers() {
+			 return iUserService.getListConnectedUser();
+
+		}
+	
+	@GetMapping(value = "/getNewUserByNbDays/{nbDays}")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody	
+		public List<User> getNewUserByNbDays(@PathVariable("nbDays") int nbDays) {
+			 return iUserService.getNewUserByNbDays(nbDays);
+
+		}
+
+	
+
 
 }

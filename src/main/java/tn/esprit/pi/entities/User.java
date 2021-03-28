@@ -1,15 +1,16 @@
 package tn.esprit.pi.entities;
 
 import javax.persistence.*;
+
+
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,10 +36,23 @@ public class User implements Serializable {
 	private String email;
 	private String numTel;
 	private String sex;
-	
+
+	@Column(columnDefinition = "integer default 0 not null")
+	private int counterLogin;
+	@Column(columnDefinition="tinyint(1) default 0 not null")
+	private boolean desactivate;
+	@Temporal(TemporalType.DATE)
+	private Date lastLoginDate;
+	@Temporal(TemporalType.DATE)
+	private Date dateCreate;
+	@Column(columnDefinition = "integer default 0 not null")
+	private int point;
+	private int lastyearaddpoint;
 	private String password;
 	private int age;
+	@JsonIgnore
 	private boolean isConnected;
+	@JsonIgnore
 	private boolean viewAd;
 	@JsonIgnore
     private String resetToken;
@@ -248,6 +262,56 @@ public class User implements Serializable {
 
 	public void setSex(String sex) {
 		this.sex = sex;
+	}
+
+
+
+	public int getCounterLogin() {
+		return counterLogin;
+	}
+
+	public void setCounterLogin(int counterLogin) {
+		this.counterLogin = counterLogin;
+	}
+
+	public boolean isDesactivate() {
+		return desactivate;
+	}
+
+	public void setDesactivate(boolean desactivate) {
+		this.desactivate = desactivate;
+	}
+
+	public Date getLastLoginDate() {
+		return lastLoginDate;
+	}
+
+	public void setLastLoginDate(Date lastLoginDate) {
+		this.lastLoginDate = lastLoginDate;
+	}
+
+	public Date getDateCreate() {
+		return dateCreate;
+	}
+
+	public void setDateCreate(Date dateCreate) {
+		this.dateCreate = dateCreate;
+	}
+
+	public int getPoint() {
+		return point;
+	}
+
+	public void setPoint(int point) {
+		this.point = point;
+	}
+
+	public int getLastyearaddpoint() {
+		return lastyearaddpoint;
+	}
+
+	public void setLastyearaddpoint(int lastyearaddpoint) {
+		this.lastyearaddpoint = lastyearaddpoint;
 	}
 
 	

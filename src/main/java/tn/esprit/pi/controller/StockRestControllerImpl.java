@@ -1,21 +1,19 @@
 package tn.esprit.pi.controller;
-
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.Product;
-
+import tn.esprit.pi.entities.Provider;
 import tn.esprit.pi.service.IStockService;
 
 @RestController
@@ -90,5 +88,29 @@ public class StockRestControllerImpl {
 
 		return iStockService.getNomberProvider(providerId);
 	}
+	@GetMapping(value = "getProvidersByProduct/{productId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public List<Provider> getProviderByProduct(@PathVariable("productId") long productId) {
 
+		return iStockService.getProviderByProduct(productId);
+	}
+	
+	@PostMapping(value = "notifyProvider/{productId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public String notifyProvider(@PathVariable("productId") long productId) {
+
+		 iStockService.NotifyProvider(productId);
+		 return "ok";
+	}
+	
+	@GetMapping(value = "getSumOutlay")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public int getSumOutlay() {
+
+		return iStockService.getSumOutlay();
+	}
+	
 }

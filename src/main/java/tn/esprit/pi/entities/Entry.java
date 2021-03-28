@@ -24,6 +24,7 @@ public class Entry implements Serializable {
 	private long entryId;
 	private int quantity;
 	private float montant;
+	private float ArticalPrice;
 	@Temporal(TemporalType.DATE)
 	private Date entryDate= new Date(System.currentTimeMillis());
 	@ManyToOne
@@ -84,6 +85,16 @@ public class Entry implements Serializable {
 
 	public void setProvider(Provider provider) {
 		this.provider = provider;
+	}
+
+
+	public float getArticalPrice() {
+		return ArticalPrice;
+	}
+
+
+	public void setArticalPrice(float articalPrice) {
+		ArticalPrice = articalPrice;
 	}
 
 }

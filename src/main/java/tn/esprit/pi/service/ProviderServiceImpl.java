@@ -45,7 +45,6 @@ public class ProviderServiceImpl implements IproviderService {
 
 	@Override
 	public Provider updateProvider(Provider provider) {
-	
 	providerRepository.save(provider);
 	return provider;
 	}

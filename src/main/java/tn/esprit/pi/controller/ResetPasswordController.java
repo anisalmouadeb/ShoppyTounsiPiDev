@@ -1,5 +1,6 @@
 package tn.esprit.pi.controller;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import tn.esprit.pi.configuration.EmailConfig;
+import tn.esprit.pi.entities.MailHistory;
 import tn.esprit.pi.entities.User;
 import tn.esprit.pi.payload.LoginRequest;
 import tn.esprit.pi.payload.ResetPassword;
+import tn.esprit.pi.repository.MailHistoryRepository;
 import tn.esprit.pi.repository.UserRepository;
 
 @RestController
@@ -33,6 +36,9 @@ public class ResetPasswordController {
 
 	@Autowired
 	PasswordEncoder passwordencoder;
+
+	@Autowired
+	MailHistoryRepository mailHistoryRepo;
 
 	@PostMapping("/forget")
 	public String processForgotPasswordForm(@RequestBody LoginRequest loginrequest, HttpServletRequest request) {
@@ -52,11 +58,18 @@ public class ResetPasswordController {
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setFrom("ShoppyTounsi@Gmail.com");
 		mailMessage.setTo(user.getEmail());
-		mailMessage.setSubject("Reset  Ppassword ShoppyTounsi");
+		mailMessage.setSubject("Reset  Password ShoppyTounsi");
 		mailMessage.setText(
-				"To reset your password, click the link below:\n" + appUrl + "/reset?token=" + user.getResetToken());
+				"To reset your password, use this code \n" + user.getResetToken());
 		// Send mail
 		mailSender.send(mailMessage);
+		Date d = new Date(System.currentTimeMillis());
+		MailHistory m = new MailHistory();
+		m.setDistination(user.getEmail());
+		m.setBody("To reset your password, use this code \n" + user.getResetToken());
+		m.setSendDate(d);
+		m.setType("resetPassword");
+		mailHistoryRepo.save(m);
 		return user.getResetToken();
 	}
 
@@ -69,7 +82,8 @@ public class ResetPasswordController {
 
 		// Set new password
 		resetUser.setPassword(passwordencoder.encode(resetpass.getPassword()));
-
+		resetUser.setDesactivate(false);
+		resetUser.setCounterLogin(0);
 		// Set the reset token to null so it cannot be used again
 		resetUser.setResetToken(null);
 

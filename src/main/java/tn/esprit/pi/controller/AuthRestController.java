@@ -1,20 +1,26 @@
 package tn.esprit.pi.controller;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,18 +28,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import tn.esprit.pi.entities.BlacklistToken;
 import tn.esprit.pi.entities.Role;
 import tn.esprit.pi.entities.Roles;
+import tn.esprit.pi.entities.ShoppingCart;
+import tn.esprit.pi.entities.Tokens;
 import tn.esprit.pi.entities.User;
 import tn.esprit.pi.payload.JwtResponse;
 import tn.esprit.pi.payload.LoginRequest;
 import tn.esprit.pi.payload.MessageResponse;
 import tn.esprit.pi.payload.SignUpRequest;
+import tn.esprit.pi.repository.BlacklistTokenRepository;
 import tn.esprit.pi.repository.RoleRepository;
+import tn.esprit.pi.repository.ShoppingCartRepository;
+import tn.esprit.pi.repository.TokenReopsitory;
 import tn.esprit.pi.repository.UserRepository;
 import tn.esprit.pi.security.JwtUtils;
+import tn.esprit.pi.security.SharedLogg;
 import tn.esprit.pi.security.UserDetailsImpl;
 import tn.esprit.pi.service.IUserService;
+import tn.esprit.pi.service.UserServiceImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -47,16 +61,28 @@ public class AuthRestController {
 
 	@Autowired
 	RoleRepository roleRepository;
+	@Autowired
+	IUserService iUserService;
 
+	@Autowired
+	UserServiceImpl userServiceImpl;
 	@Autowired
 	PasswordEncoder encoder;
-
+	@Autowired
+	ShoppingCartRepository shoppingCartRepository;
 	@Autowired
 	JwtUtils jwtUtils;
-
+	@Autowired
+	TokenReopsitory tokenReopsitory;
+	@Autowired
+	BlacklistTokenRepository blackListtokenReopsitory;
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
+try{
+		User u=userRepository.findByName(loginRequest.getUsername()).orElse(null);
+		if(u.isDesactivate()){
+			return ResponseEntity.badRequest().body(new MessageResponse("Error: This account is desactivate"));
+		}
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -66,10 +92,37 @@ public class AuthRestController {
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
-
+		User user=userRepository.findById(userDetails.getId()).get();
+		user.setCounterLogin(0);
+		user.setLastLoginDate(new Date());
+		user.setConnected(true);
+		userRepository.save(user);
+		Tokens t = new Tokens();
+		t.setName(jwt);
+		t.setUserId(user.getUserId());
+		tokenReopsitory.save(t);
 		return ResponseEntity.ok(
 				new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+}catch (Exception e) {
+	User user=userRepository.findByName(loginRequest.getUsername()).orElse(null);
+	if(user!=null){
+		int compt=user.getCounterLogin();
+		if(compt<2){
+		user.setCounterLogin(++compt);
+		userRepository.save(user);
+		return ResponseEntity.badRequest().body(new MessageResponse( "Error: "+ compt+" tentative(s),you have three, please try again"));
+		}
+		else{
+			user.setDesactivate(true);
+			userRepository.save(user);
+			return ResponseEntity.badRequest().body(new MessageResponse("Error:  account is desactivate, the administrator will see your connection tentavie and send you a mail with the new coordonates "));
+		}
+		
 	}
+	
+	return ResponseEntity.badRequest().body(new MessageResponse("Error:  try to push a true username and password"));
+}	
+}
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
@@ -89,7 +142,7 @@ public class AuthRestController {
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Roles> roles = new HashSet<>();
 
-		if (strRoles==null) {
+		if (strRoles== null) {
 			Roles userRole = roleRepository.findByName(Role.ROLE_CLIENT)
 					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 			roles.add(userRole);
@@ -115,15 +168,133 @@ public class AuthRestController {
 				default:
 					Roles userRole = roleRepository.findByName(Role.ROLE_CLIENT)
 							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+					
+				
+				
 					roles.add(userRole);
 				}
 			});
 		}
-
+		user.setDateCreate(new Date());
 		user.setRoles(roles);
 		userRepository.save(user);
+		
+		if(signUpRequest.getRole()== null||signUpRequest.getRole().contains("client"))
+		{
+			ShoppingCart s = new ShoppingCart();
+			s.setDateCreation(new Date(System.currentTimeMillis()));
+			s.setUser(user);
+			shoppingCartRepository.save(s);
+		}
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
 
+
+	@PostMapping("/batch-desactivate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> desactivateUsersBatch() {
+		//number  desactivate account
+		int index=0;
+		List<User> alluser= userRepository.findAll();
+		for(User user: alluser){
+		if(!userServiceImpl.getRoleById(user.getUserId()).contains("admin") && !user.isDesactivate()){
+			Date lastlogin=user.getLastLoginDate();
+			if((new Date()).getMonth()- lastlogin.getMonth()>=1 || (new Date()).getYear()- lastlogin.getYear()>=1 ){
+				user.setDesactivate(true);	
+				user.setConnected(false);
+				userRepository.save(user);
+				iUserService.setTokenToBlackList(user.getUserId());
+				index++;
+			}
+		}
+		}
+		return ResponseEntity.ok(new MessageResponse(index+" are desactivate"));
+	}
+	
+	@PostMapping("/batch-point")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> UpdatePointBatch(Authentication authentication) {
+		
+		int index=0;
+		List<User> alluser= userRepository.findAll();
+		for(User user: alluser){
+			for(Roles r :user.getRoles())
+			{
+			
+			
+			
+		if(!user.isDesactivate()){
+			if(r.getName().equals(Role.ROLE_CLIENT))
+			{
+				
+			
+			Date datecreate=user.getDateCreate();
+			Date today=new Date();
+			int yearToday=today.getYear();
+			if((yearToday+1900)!=user.getLastyearaddpoint()){
+			
+			if(today.getDate()==datecreate.getDate() && today.getMonth()==datecreate.getMonth() && today.getYear()!=datecreate.getYear() )
+			{
+				user.setPoint(user.getPoint()+100);
+				user.setLastyearaddpoint(yearToday+1900);
+				userRepository.save(user);
+				index++;
+			}
+			}
+			}
+		}
+		}
+		}
+		//add this to log
+	//	UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
+		//SharedLogg.addlog("user", "insert",userDetails);	
+		//the first is the table name, the second is the action, the third user connected
+		//
+		
+		
+		return ResponseEntity.ok(new MessageResponse("Add 100 points  for " +index+ " customer(s)"));
+	}
+
+	
+	
+	@GetMapping("/get_All_desactivate_Acount")
+	@PreAuthorize("hasRole('ADMIN')")
+	public List<User>  get_All_desactivate_Acount() {
+		
+		List<User> userdesactivate=new ArrayList<User>();
+		for(User user: userRepository.findAll()){
+		if(user.isDesactivate()){
+			userdesactivate.add(user);
+		}
+		}
+		return userdesactivate;
+	}
+	
+	@PostMapping("/desactivate_Acount/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public  ResponseEntity<?>  desactivate_Acount(@PathVariable("userId") long userId) {
+          
+           iUserService .desactivate_Acount(userId);
+           iUserService.setTokenToBlackList(userId);
+           return ResponseEntity.ok(new MessageResponse("User Account deactivated"));
+	}
+	
+	@PostMapping("/activate_Acount/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public  ResponseEntity<?>  activate_Acount(@PathVariable("userId") long userId) {
+          
+           iUserService .activate_Acount(userId);
+           return ResponseEntity.ok(new MessageResponse("User Account activated"));
+	}
+	
+	@PostMapping(value = "/logout")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')  ")
+	@ResponseBody	
+		public ResponseEntity<?> logout(Authentication auth) {
+			  iUserService.logout(auth);
+			return  ResponseEntity.ok("loggedOut");
+		}
+
+	
 }
