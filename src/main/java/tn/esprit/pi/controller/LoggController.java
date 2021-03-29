@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,7 @@ public class LoggController {
 	
 	
 	@GetMapping("/get_All_Logg")
+	@PreAuthorize("hasRole('ADMIN')")
 	public List<Logg>  get_All_Logg() {
 		
 		//administrator
@@ -53,6 +55,7 @@ public class LoggController {
 	}
 	
 	@GetMapping("/get_All_Logg_User")
+	@PreAuthorize("hasRole('ADMIN')")
 	public List<Logg>  get_All_Logg_User(Authentication authentication) {
 		try{
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -66,4 +69,12 @@ public class LoggController {
 		return null;
 	}
 	
+	@GetMapping("/get_All_Logg_ByUserId/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public List<Logg>  get_All_Logg_User(@PathVariable("userId")long userId) {
+
+		
+		return loggservice.getLoggByUser(userId);
+		
+	}
 }

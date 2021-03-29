@@ -17,4 +17,5 @@ public interface IUserService {
     public List<User> getListConnectedUser();
     public List <User> getNewUserByNbDays(int nbDays);
     public void logout(Authentication auth);
+	public void deleteRole(long userId);
 }

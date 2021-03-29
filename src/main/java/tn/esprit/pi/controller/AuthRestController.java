@@ -115,7 +115,7 @@ try{
 		else{
 			user.setDesactivate(true);
 			userRepository.save(user);
-			return ResponseEntity.badRequest().body(new MessageResponse("Error:  account is desactivate, the administrator will see your connection tentavie and send you a mail with the new coordonates "));
+			return ResponseEntity.badRequest().body(new MessageResponse("Error:  please contact our admin  "));
 		}
 		
 	}

@@ -137,6 +137,14 @@ public class UserRestControllerImpl {
 
 		}
 
+	@DeleteMapping(value = "/deleteRole/{userId}")
+
+	@ResponseBody	
+		public int deleteRole(@PathVariable("userId") int userId) {
+			  iUserService.deleteRole(userId);
+			  return 1;
+		}
+
 	
 
 

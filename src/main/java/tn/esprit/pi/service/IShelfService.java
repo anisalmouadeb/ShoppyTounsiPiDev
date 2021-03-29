@@ -69,6 +69,8 @@ public interface IShelfService {
 
 	List<Product> getOrdersByCategory(long categoryId);
 
+	public void deleteShelfByDate();
+
    
    
 }

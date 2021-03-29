@@ -2,6 +2,7 @@ package tn.esprit.pi.controller;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Provider;
+import tn.esprit.pi.security.SharedLogg;
+import tn.esprit.pi.security.UserDetailsImpl;
 import tn.esprit.pi.service.IStockService;
 
 @RestController
@@ -33,9 +36,11 @@ public class StockRestControllerImpl {
 	@PostMapping("/addEntry")
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public String addEntry(@RequestBody Entry entry) {
-		iStockService.addEntry(entry);
-		return "stock updated with success";
+	public String addEntry(@RequestBody Entry entry,Authentication auth) {
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelf", "select",userDetails);	
+		return iStockService.addEntry(entry);
+		 
 	}
 
 	@DeleteMapping("/deleteEntryById/{identry}")
