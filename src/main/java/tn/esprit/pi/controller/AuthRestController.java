@@ -83,6 +83,7 @@ try{
 		if(u.isDesactivate()){
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: This account is desactivate"));
 		}
+		
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
