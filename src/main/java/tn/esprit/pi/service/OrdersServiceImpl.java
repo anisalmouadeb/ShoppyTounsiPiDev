@@ -3,10 +3,12 @@ package tn.esprit.pi.service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -48,6 +50,8 @@ public class OrdersServiceImpl implements IOrdersService {
 	@Override
 	public String ConfirmOrder(long ShoppingCartId) {
 
+		Date date = new Date();
+
 		ShoppingCart s = ShoppingCartRepo.findById(ShoppingCartId).get();
 		List<OrderLine> orderLines = new ArrayList<OrderLine>();
 		orderLines = s.getOrderLines();
@@ -57,13 +61,18 @@ public class OrdersServiceImpl implements IOrdersService {
 		List<OrderLine> orderLines2 = new ArrayList<OrderLine>();
 		Orders order = new Orders();
 		order.setOrderLine(orderLines2);
+		float totalAmount = 0;
 		for (OrderLine o : orderLines) {
 			if (o.getConfirmed() == false) {
 				order.getOrderLine().add(o);
 				o.setConfirmed(true);
+
+				totalAmount = totalAmount + o.getPrice();
 				OrderLineRepo.save(o);
 			}
 		}
+		order.setOrderDate(date);
+		order.setOrderAmount(totalAmount);
 		OrdersRepo.save(order);
 		return "Saved Orders";
 
@@ -103,7 +112,6 @@ public class OrdersServiceImpl implements IOrdersService {
 		}
 
 	}
-	
 
 	@Override
 	public Orders getOrderById(Long id) {
@@ -113,9 +121,55 @@ public class OrdersServiceImpl implements IOrdersService {
 	@Override
 	public List<OrderLine> ConfirmedOrderLinesByOrder(Long OrderId) {
 		return OrdersRepo.ConfirmedOrderLinesByOrder(OrderId);
-		
-	}
-	
 
-	
+	}
+
+	@Override
+	public Orders GetOrderOftheMonth() {
+		Date date = new Date();
+		int month = date.getMonth();
+		List<Orders> lastMorders = new ArrayList<>();
+		List<Orders> orders = (List<Orders>) OrdersRepo.findAll();
+		for (Orders os : orders) {
+			if (os.getOrderDate().getMonth() == month) {
+				lastMorders.add(os);
+				System.out.println(lastMorders.size());
+			}
+		}
+		Orders MaxAmount = lastMorders.get(0);
+
+		for (Orders Ords : lastMorders) {
+			if (MaxAmount.getOrderAmount() < Ords.getOrderAmount())
+				MaxAmount = Ords;
+		}
+		return MaxAmount;
+	}
+
+	@Override
+	public User GetStarUserOftheMonth() {
+		Date date = new Date();
+		int month = date.getMonth();
+		List<Orders> lastMorders = new ArrayList<>();
+		List<Orders> orders = (List<Orders>) OrdersRepo.findAll();
+		for (Orders os : orders) {
+			if (os.getOrderDate().getMonth() == month) {
+				lastMorders.add(os);
+				System.out.println(lastMorders.size());
+			}
+		}
+		Orders MaxAmount = lastMorders.get(0);
+
+		for (Orders Ords : lastMorders) {
+			if (MaxAmount.getOrderAmount() < Ords.getOrderAmount())
+				MaxAmount = Ords;
+		}
+
+		User u = new User();
+		for (OrderLine o : MaxAmount.getOrderLine()) {
+			u = o.getShoppingCart().getUser();
+		}
+		u.setPoint(u.getPoint() + 20);
+		return u;
+	}
+
 }

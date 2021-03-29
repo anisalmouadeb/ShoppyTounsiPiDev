@@ -1,4 +1,5 @@
 package tn.esprit.pi.controller;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,12 +17,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lowagie.text.DocumentException;
 
-
 import tn.esprit.pi.entities.OrderLine;
+import tn.esprit.pi.entities.Orders;
+import tn.esprit.pi.entities.User;
 import tn.esprit.pi.repository.OrderLineRepository;
 import tn.esprit.pi.repository.OrdersRepository;
 import tn.esprit.pi.repository.ShoppingCartRepository;
@@ -59,7 +62,8 @@ public class OrdersController {
 	 */
 
 	@GetMapping("/export/pdf/{id}")
-	public void exportToPDF(HttpServletResponse response,@PathVariable("id") long id) throws DocumentException, IOException {
+	public void exportToPDF(HttpServletResponse response, @PathVariable("id") long id)
+			throws DocumentException, IOException {
 		response.setContentType("application/pdf");
 		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
 		String currentDateTime = dateFormatter.format(new Date());
@@ -69,10 +73,22 @@ public class OrdersController {
 		response.setHeader(headerKey, headerValue);
 
 		List<OrderLine> orders = new ArrayList<OrderLine>();
-		orders=OrdersRepo.findById(id).get().getOrderLine();
+		orders = OrdersRepo.findById(id).get().getOrderLine();
 		PDFExporter exporter = new PDFExporter(orders);
 		exporter.export(response);
 
 	}
 
+	@GetMapping(value = "/GetOrderOftheMonth")
+	@ResponseBody
+	public Orders GetOrderOftheMonth() {
+		return OrdersService.GetOrderOftheMonth();
+	}
+	
+	
+	@GetMapping(value = "/GetStarUserOftheMonth")
+	@ResponseBody
+	public User GetStarUserOftheMonth() {
+		return OrdersService.GetStarUserOftheMonth();
+	}
 }

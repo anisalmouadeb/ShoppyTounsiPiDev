@@ -26,6 +26,8 @@ public class Orders implements Serializable {
 
 	@Temporal(TemporalType.DATE)
 	private Date orderDate;
+	
+	private float orderAmount ;
 
 	@OneToOne(mappedBy = "order")
 	private Delivery delivery;
@@ -91,6 +93,14 @@ public class Orders implements Serializable {
 
 	public void setOrderLine(List<OrderLine> orderLine) {
 		this.orderLine = orderLine;
+	}
+
+	public float getOrderAmount() {
+		return orderAmount;
+	}
+
+	public void setOrderAmount(float orderAmount) {
+		this.orderAmount = orderAmount;
 	}
 
 }

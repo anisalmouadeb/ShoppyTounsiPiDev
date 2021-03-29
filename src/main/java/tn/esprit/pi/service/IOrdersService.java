@@ -5,6 +5,7 @@ import java.util.List;
 import tn.esprit.pi.entities.OrderLine;
 import tn.esprit.pi.entities.Orders;
 import tn.esprit.pi.entities.ShoppingCart;
+import tn.esprit.pi.entities.User;
 
 public interface IOrdersService {
 
@@ -21,6 +22,11 @@ public interface IOrdersService {
 	public List<OrderLine> ConfirmedOrderLinesByOrder(Long OrderId);
 
 	public Orders getOrderById(Long id);
+
+	public Orders GetOrderOftheMonth();
+
+	
+	public User GetStarUserOftheMonth();
 
 
 
