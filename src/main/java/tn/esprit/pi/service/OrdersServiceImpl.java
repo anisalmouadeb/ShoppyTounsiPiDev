@@ -1,15 +1,22 @@
 package tn.esprit.pi.service;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
+import tn.esprit.pi.entities.BonAchat;
 import tn.esprit.pi.entities.OrderLine;
 import tn.esprit.pi.entities.Orders;
 import tn.esprit.pi.entities.ShoppingCart;
 import tn.esprit.pi.entities.User;
+import tn.esprit.pi.repository.BonAchatRepository;
 import tn.esprit.pi.repository.OrderLineRepository;
 import tn.esprit.pi.repository.OrdersRepository;
 import tn.esprit.pi.repository.ProductRepository;
@@ -35,6 +42,8 @@ public class OrdersServiceImpl implements IOrdersService {
 	IOrderLineService OrderLineService;
 	@Autowired
 	OrdersRepository OrdersRepo;
+	@Autowired
+	BonAchatRepository BonAchatRepo;
 
 	@Override
 	public String ConfirmOrder(long ShoppingCartId) {
@@ -79,18 +88,34 @@ public class OrdersServiceImpl implements IOrdersService {
 		float totalAmountOrder = 0;
 		for (OrderLine ol : orderLines) {
 			totalAmountOrder = totalAmountOrder + ol.getPrice();
-			u=ol.getShoppingCart().getUser();
-			
+			u = ol.getShoppingCart().getUser();
+
+		}
+		float Totalpts = u.getPoint() * 100;
+		BonAchat bAchat = BonAchatRepo.findByCode(code);
+		float BaPrice = bAchat.getPrice();
+		System.out.println(Totalpts + BaPrice);
+		System.out.println(totalAmountOrder);
+		if (totalAmountOrder < Totalpts + BaPrice) {
+			return "payment done with success ";
+		} else {
+			return "update BA or points ";
 		}
 
-		return " payment done";
+	}
+	
 
+	@Override
+	public Orders getOrderById(Long id) {
+		return OrdersRepo.findById(id).get();
 	}
 
 	@Override
-	public String PaymentDone(long OrderId) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<OrderLine> ConfirmedOrderLinesByOrder(Long OrderId) {
+		return OrdersRepo.ConfirmedOrderLinesByOrder(OrderId);
+		
 	}
+	
 
+	
 }
