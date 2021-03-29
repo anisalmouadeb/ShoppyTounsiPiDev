@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import tn.esprit.pi.entities.BlacklistToken;
@@ -18,7 +19,9 @@ import tn.esprit.pi.entities.ShelfRating;
 import tn.esprit.pi.entities.Tokens;
 import tn.esprit.pi.entities.User;
 import tn.esprit.pi.repository.BlacklistTokenRepository;
+import tn.esprit.pi.repository.LoggRepository;
 import tn.esprit.pi.repository.ShelfRatingRepository;
+import tn.esprit.pi.repository.ShoppingCartRepository;
 import tn.esprit.pi.repository.TokenReopsitory;
 import tn.esprit.pi.repository.UserRepository;
 
@@ -37,6 +40,10 @@ public class UserServiceImpl implements IUserService {
 	TokenReopsitory tokenReopsitory;
 	@Autowired
 	BlacklistTokenRepository blacklistTokenRepo;
+	@Autowired
+	ShoppingCartRepository shoppingCartRepository;
+	@Autowired
+	LoggRepository loggRepository;
 
 	@Override
 	public User getUserById(long userId) {
@@ -50,20 +57,36 @@ public class UserServiceImpl implements IUserService {
 		return (List<User>) userRepository.findAll();
 	}
 
+
 	@Override
 	public String deleteUserById(long userId) {
 		User u = userRepository.findById(userId).get();
 		List<ShelfRating> s = (List<ShelfRating>) shelfRatingRepository.findAll();
 
+		if(this.getRoleById(u.getUserId()).contains("admin"))
+				{
+			return "this user is an admin";
+				}
 		for (ShelfRating s1 : s) {
 			if (s1.getUser() == u) {
 				shelfServiceImpl.deleteRating(userId, s1.getShelf().getShelfId());
 			}
 		}
-		userRepository.deleteRole(u.getUserId());
+		loggRepository.deleteByUserId(userId);
+		this.setTokenToBlackList(userId);
+		if(u.getShoppingcart()!=null)
+		u.getShoppingcart().setUser(null);
+		System.out.println("hello");
+		
+	 this.deleteRole(userId);
 		userRepository.delete(u);
 		return "deleted";
 	}
+	@Override
+	public void deleteRole(long userId) {
+	 userRepository.deleteRole(userId);
+	}
+	
 
 	@Override
 	public User updateUser(User u, Authentication auth) {
@@ -182,12 +205,12 @@ public class UserServiceImpl implements IUserService {
 		Date date1 = new Date(d.getTime() - (nbDays * 86400000));
 		for(User u: users )
 		{
-			System.out.println(date1);
-			System.out.println(u.getDateCreate());
+			
 			
 			if(u.getDateCreate().compareTo(date1)>0 && this.getRoleById(u.getUserId()).contains("client"))
 			{
-				
+				System.out.println(date1);
+				System.out.println(u.getDateCreate());
 				newusers.add(u);
 			}
 		}

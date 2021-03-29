@@ -61,7 +61,9 @@ public class ShelfServiceImpl implements IShelfService {
 			{
 				
 			}
-			shelf.setDateExpiration(new Date(System.currentTimeMillis()));
+			Date d = new Date(System.currentTimeMillis());
+			Date expiration = new Date(d.getTime() + (2 * 86400000));
+			shelf.setDateExpiration(expiration);
 			List<CategoryRevenulastThreeDays> cat= new ArrayList<CategoryRevenulastThreeDays>();
 			cat=this.getCategoryLastThreeDays();
 			CategoryRevenulastThreeDays c = new CategoryRevenulastThreeDays();
@@ -103,7 +105,9 @@ public class ShelfServiceImpl implements IShelfService {
 				p.setPriceV(p.getPriceV() + (p.getPriceV() * shelf.getReductionPercantage()) / 100);
                 productRepository.save(p);
 			}
-			cat.setShelf(null);
+			System.out.println("hi");
+			Shelf s= shelfRepository.findById(cat.getLastShelf()).get();
+			cat.setShelf(s);
 
 		}
 		
@@ -120,7 +124,8 @@ public class ShelfServiceImpl implements IShelfService {
 		}
 
 		historiqueShelfRepository.save(h);
-
+        shelfRatingRepository.deleteAllShelfRating(shelf.getShelfId());
+        
 		shelfRepository.delete(shelf);
 		return "supprimer avec succ";
 	}
@@ -140,20 +145,24 @@ public class ShelfServiceImpl implements IShelfService {
 		Date d = new Date(System.currentTimeMillis());
 		List<Product> products = new ArrayList<Product>();
 		List<Shelf> shelfs2 = new ArrayList<Shelf>();
-
+		System.out.println("anis");
 		for (Shelf s : shelfs) {
 			if (s.getType().equals(ShelfType.PROMO) && s.getDateExpiration().compareTo(d) > 0) {
 				Shelf shelf=s.calculateNewPrice();
 				shelfs2.add(shelf);
 			}
 		}
+		
 		for (Shelf s : shelfs) {
+		
 			if (s.getType().equals(ShelfType.RAMADHAN) && s.getDateExpiration().compareTo(d) > 0) {
 				shelfs2.add(s);
+				
 			}
 		}
-
+		System.out.println("anis");
 		if (auth == null) {
+			System.out.println("hi");
 			for (Shelf s : this.listShelfForNotAuth()) {
 				shelfs2.add(s);
 			}
@@ -252,6 +261,7 @@ public class ShelfServiceImpl implements IShelfService {
 		List<Shelf> shelfsord = new ArrayList<Shelf>();
 		shelfsord = shelfRepository.getShelfdOrderByRating();
 		for (Shelf s1 : shelfsord) {
+			
 			if (!s1.getType().equals(ShelfType.RAMADHAN) && !s1.getType().equals(ShelfType.PROMO)) {
 				shelfs.add(s1);
 			}
@@ -465,24 +475,26 @@ Collections.sort(rev);
 		return s;
 	}
 
-	// @Scheduled(cron = "*/20 * * * * *")
+	//@Scheduled(cron = "*/20 * * * * *")
+	@Override
 	@Transactional
 	public void deleteShelfByDate() {
 		List<Shelf> shelfs = new ArrayList<Shelf>();
 		shelfs = (List<Shelf>) shelfRepository.findAll();
 		Date d = new Date(System.currentTimeMillis());
-
+		Date thirtyDaysAgo = new Date(d.getTime() + (1 * 86400000));
 		for (Shelf s : shelfs) {
 
 			if (s.getDateExpiration() != null) {
-				if (s.getDateExpiration().compareTo(d) < 0) {
+				System.out.println(thirtyDaysAgo);
+				if (s.getDateExpiration().compareTo(thirtyDaysAgo) < 0) {
 			
 					this.DeleteShelfById(s.getShelfId());
 
 				}
 			}
 		}
-
+		System.out.println(thirtyDaysAgo);
 		System.out.println("anis");
 	}
 
@@ -532,7 +544,12 @@ Collections.sort(rev);
 			for(Product p : category.getProduct())
 			{
 			p.setInPromo(false);
-			p.setPriceV(p.getPriceV() + (p.getPriceV() * shelf.getReductionPercantage()) / 100);
+			float price=0;
+			int per =shelf.getReductionPercantage();
+			float var= 100/per;
+			price=p.getPriceV()*(var/(var-1));
+			
+			p.setPriceV(price);
             productRepository.save(p);
 			}
 		}

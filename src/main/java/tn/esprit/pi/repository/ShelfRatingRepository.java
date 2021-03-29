@@ -2,9 +2,11 @@ package tn.esprit.pi.repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import tn.esprit.pi.entities.Category;
 import tn.esprit.pi.entities.Shelf;
@@ -28,4 +30,8 @@ public interface ShelfRatingRepository extends CrudRepository<ShelfRating, Long>
 	@Query("SELECT s FROM  ShelfRating s where s.shelf.ShelfId=:shelfId and s.user.userId=:userId ")
     public ShelfRating getRatingByUserAndShelf(@Param("userId") long userId ,@Param("shelfId")long Shelfid);
 
+	@Modifying
+	@Transactional
+	@Query("Delete FROM  ShelfRating s where s.shelf.ShelfId=:shelfId  ")
+    public void deleteAllShelfRating( @Param("shelfId")long Shelfid);
 }

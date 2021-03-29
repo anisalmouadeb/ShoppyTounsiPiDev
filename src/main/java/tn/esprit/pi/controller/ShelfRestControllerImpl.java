@@ -76,7 +76,7 @@ public class ShelfRestControllerImpl {
 		}
 		
 		 ishelfService.addShelf(shelf);
-		return ResponseEntity.ok("Shalf added");
+		return ResponseEntity.ok("Shalf added shelfId :"+ shelf.getShelfId());
 	}
 
 	// {"shelfId":1,"shelfname":"name222", "dateCreation":"2021-02-27",
@@ -84,7 +84,9 @@ public class ShelfRestControllerImpl {
 	@PutMapping("/updateShelf")
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public ResponseEntity<String> updateShelf(@RequestBody Shelf shelf) {
+	public ResponseEntity<String> updateShelf(Authentication auth, @RequestBody Shelf shelf) {
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelf", "update",userDetails);
 		ishelfService.updateShelf(shelf);
 		return ResponseEntity.ok("Shalf updated");
 	}
@@ -92,7 +94,9 @@ public class ShelfRestControllerImpl {
 	@DeleteMapping("/deleteShelfById/{idshelf}")
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public String deleteEmployeById(@PathVariable("idshelf") long shelfId) {
+	public String deleteEmployeById(Authentication auth, @PathVariable("idshelf") long shelfId) {
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelf", "delete",userDetails);
 		return ishelfService.DeleteShelfById(shelfId);
 
 	}
@@ -105,14 +109,16 @@ public class ShelfRestControllerImpl {
 		return ishelfService.getAllShelfs();
 	}
 
-	@PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")	
+
 	@GetMapping(value = "/getShelfs")
 	
 	@ResponseBody
 	public List<Shelf> getShelfs(Authentication auth) {
-		
+		if(auth!=null)
+		{
 		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
 			SharedLogg.addlog("shelf", "select",userDetails);	
+		}
 		return ishelfService.getShelfs(auth);
 	}
 	
@@ -123,6 +129,8 @@ public class ShelfRestControllerImpl {
 	@ResponseBody
 	public ResponseEntity<?> getShelfById(@PathVariable("idshelf") long shelfId) {
 
+		
+		
 		Optional<Shelf> shelf = shelfRepo.findById(shelfId);
 		if (shelf ==null)
 		return  ResponseEntity.badRequest().body("not exist");
@@ -149,9 +157,21 @@ public class ShelfRestControllerImpl {
 	@PutMapping(value = "/affecterCategoryAShelf/{idcategory}/{idshelf}")
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public String affecterCategoryAShelf(@PathVariable("idcategory") long categoryId,
+	public String affecterCategoryAShelf(Authentication auth,@PathVariable("idcategory") long categoryId,
 			@PathVariable("idshelf") long shelfId) {
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelf", "affecterCategory",userDetails);
 		return ishelfService.affecterCategoryShelf(categoryId, shelfId);
+	}
+	
+	@PutMapping(value = "/daffecterCategoryAShelf/{idcategory}/{idshelf}")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public String daffecterCategoryAShelf(Authentication auth,@PathVariable("idcategory") long categoryId,
+			@PathVariable("idshelf") long shelfId) {
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelf", "daffecterCategory",userDetails);
+		return ishelfService.daffecterCategoryShelf(categoryId, shelfId);
 	}
 
 	@GetMapping(value = "getAllCategoriesNameByShelfId/{idshelf}")
@@ -187,22 +207,20 @@ public class ShelfRestControllerImpl {
 		}
 		
 		ishelfService.saveOrUpdateRating(auth, shelfId, rating);
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelfRating", "add",userDetails);
 		
 		return ResponseEntity.ok().body(new MessageResponse("Rating added"));
 
 	}
 
-	@PutMapping(value = "/daffecterCategoryAShelf/{idcategory}/{idshelf}")
-	@PreAuthorize("hasRole('ADMIN')")
-	@ResponseBody
-	public String daffecterCategoryAShelf(@PathVariable("idcategory") long categoryId,
-			@PathVariable("idshelf") long shelfId) {
-		return ishelfService.daffecterCategoryShelf(categoryId, shelfId);
-	}
+
 
 	@DeleteMapping("/deleteShelfRating/{shelfId}")
 	@PreAuthorize("hasRole('CLIENT')")
 	public void deleteRating( Authentication auth, @PathVariable("shelfId")long shelfId) {
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelfRating", "delete",userDetails);
 		User u = userRepository.findByName(auth.getName()).get();
 		ishelfService.deleteRating(u.getUserId(),shelfId);
 	}
@@ -307,5 +325,14 @@ public class ShelfRestControllerImpl {
 	@ResponseBody
 	public List<CategoryRevenulastThreeDays> getCategoryRevenu() {
 		return ishelfService.getCategoryLastThreeDays();
+	}
+	
+
+	@DeleteMapping(value = "deleteShelfByDate")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public String deleteShelfByDate() {
+		 ishelfService.deleteShelfByDate();
+		 return "ok";
 	}
 }

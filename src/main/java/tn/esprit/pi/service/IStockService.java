@@ -12,7 +12,7 @@ public interface IStockService {
 
 	
 	public List<Product> getListMissigProduct();
-	public long addEntry(Entry entry);
+	public String addEntry(Entry entry);
 	public String deleteEntry(long entryId);
 	public List<Entry> getAllEntry();
 	public Entry getEntryById(long entryId);

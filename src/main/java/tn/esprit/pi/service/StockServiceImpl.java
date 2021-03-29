@@ -44,7 +44,7 @@ public class StockServiceImpl implements IStockService {
 	}
 
 	@Override
-	public long addEntry(Entry entry) {
+	public String addEntry(Entry entry) {
 		Provider provider = providerRepository.findById(entry.getProvider().getProviderId()).get();
 		Product product = productRepository.findById(entry.getProduct().getProductId()).get();
 		entry.setProvider(provider);
@@ -61,10 +61,15 @@ public class StockServiceImpl implements IStockService {
 		}
 		
 		entry.setMontant(m);
-		product.setPriceA(m/entry.getQuantity());
+		float priceAchat=0;
+		priceAchat= (m+product.getQuantity()*product.getPriceA())/(entry.getQuantity()+product.getQuantity());
+		product.setPriceA(priceAchat);
+		
 		productRepository.save(product);
         entryRepository.save(entry);
-		return entry.getEntryId();
+        if(product.getPriceA()>product.getPriceV())
+        	return "stock updated with success please update the vente price of the product";
+		return "stock updated with success";
 	}
 
 	@Override
