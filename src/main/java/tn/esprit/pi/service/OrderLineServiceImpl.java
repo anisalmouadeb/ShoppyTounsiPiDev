@@ -46,6 +46,7 @@ public class OrderLineServiceImpl implements IOrderLineService {
 				o.setQuantity(o.getQuantity() + orderLine.getQuantity());
 				pro.setQuantity(pro.getQuantity() - orderLine.getQuantity());
 				o.setPrice(pro.getPriceV() * o.getQuantity());
+				o.setConfirmed(false);
 				ProductRepo.save(pro);
 				OrderLineRepo.save(o);
 				return "updated quantity";
@@ -53,6 +54,7 @@ public class OrderLineServiceImpl implements IOrderLineService {
 		}
 
 		orderLine.setPrice(pro.getPriceV() * orderLine.getQuantity());
+		orderLine.setConfirmed(false);
 		pro.setQuantity(pro.getQuantity() - orderLine.getQuantity());
 		ProductRepo.save(pro);
 		OrderLineRepo.save(orderLine);
@@ -72,22 +74,6 @@ public class OrderLineServiceImpl implements IOrderLineService {
 	}
 
 	
-	@Override
-	public List<OrderLine> getOrderLineByShoppingCartId(long ShoppingCartId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<OrderLine> removeOrderLineByShoppingCartId(long orderLineId, long ShoppingCartId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void updateQtyByOrderLineId(long orderLineId, int quantity, float price) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 }

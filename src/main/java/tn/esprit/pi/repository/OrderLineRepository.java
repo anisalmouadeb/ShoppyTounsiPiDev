@@ -11,12 +11,6 @@ import tn.esprit.pi.entities.OrderLine;
 public interface OrderLineRepository extends CrudRepository<OrderLine, Long> {
 
 	
-
-	/*List<OrderLine> getOrderLineByShoppingCartId(long shoppingCartId);
-
-	void updateQtyByOrderLineId(long orderLineId, int quantity, float price);
-
-	void removeOrderLineByShoppingCartId(long orderLineId, long shoppingCartId);*/
 	
 
 }
