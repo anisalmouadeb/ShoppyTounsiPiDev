@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +31,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import tn.esprit.pi.configuration.EmailConfig;
 import tn.esprit.pi.entities.BlacklistToken;
+import tn.esprit.pi.entities.MailHistory;
 import tn.esprit.pi.entities.Role;
 import tn.esprit.pi.entities.Roles;
 import tn.esprit.pi.entities.ShoppingCart;
@@ -37,8 +42,10 @@ import tn.esprit.pi.entities.User;
 import tn.esprit.pi.payload.JwtResponse;
 import tn.esprit.pi.payload.LoginRequest;
 import tn.esprit.pi.payload.MessageResponse;
+import tn.esprit.pi.payload.ResetPassword;
 import tn.esprit.pi.payload.SignUpRequest;
 import tn.esprit.pi.repository.BlacklistTokenRepository;
+import tn.esprit.pi.repository.MailHistoryRepository;
 import tn.esprit.pi.repository.RoleRepository;
 import tn.esprit.pi.repository.ShoppingCartRepository;
 import tn.esprit.pi.repository.TokenReopsitory;
@@ -55,10 +62,12 @@ import tn.esprit.pi.service.UserServiceImpl;
 public class AuthRestController {
 	@Autowired
 	AuthenticationManager authenticationManager;
-
+	@Autowired
+	EmailConfig emailCfg;
 	@Autowired
 	UserRepository userRepository;
-
+	@Autowired
+	MailHistoryRepository mailHistoryRepo;
 	@Autowired
 	RoleRepository roleRepository;
 	@Autowired
@@ -82,6 +91,9 @@ try{
 		User u=userRepository.findByName(loginRequest.getUsername()).orElse(null);
 		if(u.isDesactivate()){
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: This account is desactivate"));
+		}
+		if(!u.getVerified()){
+			return ResponseEntity.badRequest().body(new MessageResponse("Error: This account is not verified"));
 		}
 		
 		Authentication authentication = authenticationManager.authenticate(
@@ -187,10 +199,60 @@ try{
 			s.setUser(user);
 			shoppingCartRepository.save(s);
 		}
-
-		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+		
+		int nombreAleatoire = 1000 + (int)(Math.random() * ((9999 - 1000) + 1));
+	     user.setCodeVerif(nombreAleatoire);
+	     user.setVerified(false);
+	     userRepository.save(user);
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+		mailSender.setHost(this.emailCfg.getHost());
+		mailSender.setPort(this.emailCfg.getPort());
+		mailSender.setUsername(this.emailCfg.getUsername());
+		mailSender.setPassword(this.emailCfg.getPassword());
+		// Create an email instance
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setFrom("ShoppyTounsi@Gmail.com");
+		mailMessage.setTo(user.getEmail());
+		mailMessage.setSubject("verify your email ShoppyTounsi");
+		mailMessage.setText(
+				"To verify your email, use this code \n" + user.getCodeVerif());
+		// Send mail
+		mailSender.send(mailMessage);
+		Date d = new Date(System.currentTimeMillis());
+		MailHistory m = new MailHistory();
+		m.setDistination(user.getEmail());
+		m.setBody("To verify your email, use this code \n" + user.getCodeVerif());
+		m.setSendDate(d);
+		m.setType("verify");
+		mailHistoryRepo.save(m);
+		
+		return ResponseEntity.ok(new MessageResponse("User registered successfully! please verify your email http://localhost:8081/verifyEmail"));
 	}
 
+	
+	
+	@PostMapping("/verifyEmail/{code}")
+	public String verifieAccount(@PathVariable int code) {
+
+		Optional<User> user = userRepository.findByCodeVerif(code);
+       if (user== null)
+       {
+    	   return "please verify the code";       }
+		User resetUser = user.get();
+
+		// Set new password
+	
+		// Set the reset token to null so it cannot be used again
+		resetUser.setCodeVerif(0);
+      resetUser.setVerified(true);
+		// Save user
+		userRepository.save(resetUser);
+		return "votre compte est verifier avec succee";
+	}
+	
+	
+	
+	
 
 	@PostMapping("/batch-desactivate")
 	@PreAuthorize("hasRole('ADMIN')")

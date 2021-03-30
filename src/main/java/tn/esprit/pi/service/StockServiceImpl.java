@@ -9,12 +9,14 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import tn.esprit.pi.configuration.EmailConfig;
+import tn.esprit.pi.entities.BonCommande;
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.MailHistory;
 import tn.esprit.pi.entities.OrderLine;
 import tn.esprit.pi.entities.Orders;
 import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Provider;
+import tn.esprit.pi.repository.BonCommandeRepository;
 import tn.esprit.pi.repository.EntryRepository;
 import tn.esprit.pi.repository.MailHistoryRepository;
 import tn.esprit.pi.repository.ProductRepository;
@@ -36,7 +38,11 @@ public class StockServiceImpl implements IStockService {
 	EntryRepository entryRepository;
 	@Autowired
 	ProviderRepository providerRepository;
-
+	@Autowired
+	BonCommandeRepository bonCommandeRepository;
+	
+	
+	
 	@Override
 	public List<Product> getListMissigProduct() {
 
@@ -67,6 +73,8 @@ public class StockServiceImpl implements IStockService {
 		
 		productRepository.save(product);
         entryRepository.save(entry);
+        System.out.println(product.getName());
+        bonCommandeRepository.deleteBon(product.getName(),provider.getName(),entry.getQuantity());
         if(product.getPriceA()>product.getPriceV())
         	return "stock updated with success please update the vente price of the product";
 		return "stock updated with success";
@@ -113,7 +121,16 @@ public class StockServiceImpl implements IStockService {
 	{
 		List<Provider> providers = new ArrayList<Provider>();
 		providers= entryRepository.getProviderByProduct(productId);
-		return providers;
+		List<Provider> providers2 = new ArrayList<Provider>();
+		
+		for(Provider p : providers)
+		{
+			if(p.getDisponibility()==true)
+			{
+				providers2.add(p);
+			}
+		}
+		return providers2;
 	}
 
 	public int getLastSevenDaysQuantity(long productId)
@@ -171,13 +188,50 @@ public class StockServiceImpl implements IStockService {
 		m.setSendDate(d);
 		m.setType("provider");
 		mailHistoryRepo.save(m);
-	
+		BonCommande b = new BonCommande();
+		b.setProductName(product.getName());
+		b.setProviderName(provs.get(0).getName());
+		b.setQuantity(q);
+		bonCommandeRepository.save(b);
 	}
-
+	
 	@Override
 	public int getSumOutlay() {
 		return entryRepository.getSumOutlay();
 	}
 	
-
+	@Override
+	public List<BonCommande> getBonCommandListOutOfDate() {
+		List<BonCommande> bn= (List<BonCommande>) bonCommandeRepository.findAll();	
+		Date d = new Date(System.currentTimeMillis());
+		Date expiration = new Date(d.getTime() - (2 * 86400000));
+		List<BonCommande> bn2 = new ArrayList<BonCommande>();
+		for(BonCommande b : bn)
+		{
+			if(b.getBonCommandeDate().compareTo(expiration)<0)
+			{
+				bn2.add(b);
+			}
+		}
+		
+	return bn2;	
+	}
+	
+	@Override
+	public List<BonCommande> getBonCommandInProccess() {
+		List<BonCommande> bn= (List<BonCommande>) bonCommandeRepository.findAll();	
+		Date d = new Date(System.currentTimeMillis());
+		Date expiration = new Date(d.getTime() - (2 * 86400000));
+		List<BonCommande> bn2 = new ArrayList<BonCommande>();
+		for(BonCommande b : bn)
+		{
+			if(b.getBonCommandeDate().compareTo(expiration)>0)
+			{
+				bn2.add(b);
+			}
+		}
+		
+	return bn2;	
+	}
+	
 }
