@@ -3,6 +3,7 @@ package tn.esprit.pi.entities;
 import javax.persistence.*;
 
 
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 public class User implements Serializable {
@@ -56,19 +58,26 @@ public class User implements Serializable {
 	private boolean viewAd;
 	@JsonIgnore
     private String resetToken;
+	 private int codeVerif;
+	 private Boolean verified;
+	
 	@ManyToMany(fetch = FetchType.LAZY,cascade= CascadeType.ALL)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Roles> roles = new HashSet<>();
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Claim> claim;
+	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Post> post;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<Donation> donation;
+	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<DiscountToken> discountToken;
-	@ManyToMany(mappedBy = "user")
-	private List<Event> event;
+	
+	@ManyToMany(mappedBy="user",cascade=CascadeType.ALL)
+	private Set<Event> event;
 
 	@OneToOne(mappedBy = "user")
 	private ShoppingCart shoppingcart;
@@ -224,11 +233,13 @@ public class User implements Serializable {
 		this.discountToken = discountToken;
 	}
 
-	public List<Event> getEvent() {
+
+
+	public Set<Event> getEvent() {
 		return event;
 	}
 
-	public void setEvent(List<Event> event) {
+	public void setEvent(Set<Event> event) {
 		this.event = event;
 	}
 
@@ -312,6 +323,22 @@ public class User implements Serializable {
 
 	public void setLastyearaddpoint(int lastyearaddpoint) {
 		this.lastyearaddpoint = lastyearaddpoint;
+	}
+
+	public int getCodeVerif() {
+		return codeVerif;
+	}
+
+	public void setCodeVerif(int codeVerif) {
+		this.codeVerif = codeVerif;
+	}
+
+	public Boolean getVerified() {
+		return verified;
+	}
+
+	public void setVerified(Boolean verified) {
+		this.verified = verified;
 	}
 
 	

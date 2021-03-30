@@ -50,6 +50,16 @@ public class UserServiceImpl implements IUserService {
 
 		return userRepository.findById(userId).get();
 	}
+	public User retriveUser(String id) {
+		User user;
+		user=userRepository.findById(Long.parseLong(id)).get();
+		return user;
+		
+	}
+	public List<User> retriveAllUsers(){
+		 List<User> users=(List<User>)userRepository.findAll() ;
+		 return users;
+	} 
 
 	@Override
 	public List<User> getAllUsers() {
@@ -217,6 +227,19 @@ public class UserServiceImpl implements IUserService {
 		return newusers;
 	}
 	
-	
+	@Override
+	public void updateDateCreation(Date d, Authentication auth) {
+		
+		User u = userRepository.findByName(auth.getName()).get();
+		u.setDateCreate(d);
+		userRepository.save(u);
+	}
+	@Override
+	public void updateDateLastLogin(Date d, Authentication auth) {
+		
+		User u = userRepository.findByName(auth.getName()).get();
+		u.setLastLoginDate(d);
+		userRepository.save(u);
+	}
 	
 }

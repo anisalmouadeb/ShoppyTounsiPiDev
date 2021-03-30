@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import tn.esprit.pi.entities.BonCommande;
 import tn.esprit.pi.entities.Entry;
 import tn.esprit.pi.entities.Product;
 import tn.esprit.pi.entities.Provider;
@@ -36,9 +37,8 @@ public class StockRestControllerImpl {
 	@PostMapping("/addEntry")
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public String addEntry(@RequestBody Entry entry,Authentication auth) {
-		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
-		SharedLogg.addlog("shelf", "select",userDetails);	
+	public String addEntry(@RequestBody Entry entry) {
+		
 		return iStockService.addEntry(entry);
 		 
 	}
@@ -116,6 +116,21 @@ public class StockRestControllerImpl {
 	public int getSumOutlay() {
 
 		return iStockService.getSumOutlay();
+	}
+	@GetMapping(value = "getBonCommandListOutOfDate")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public List<BonCommande> getBonCommandListOutOfDate() {
+
+		return iStockService.getBonCommandListOutOfDate();
+	}
+	
+	@GetMapping(value = "getBonCommandInProccess")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public List<BonCommande> getBonCommandInProccess() {
+
+		return iStockService.getBonCommandInProccess();
 	}
 	
 }

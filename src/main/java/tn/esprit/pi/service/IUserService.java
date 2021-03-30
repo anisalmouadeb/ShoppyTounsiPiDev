@@ -1,5 +1,6 @@
 package tn.esprit.pi.service;
 
+import java.util.Date;
 import java.util.List;
 import org.springframework.security.core.Authentication;
 import tn.esprit.pi.entities.User;
@@ -18,4 +19,7 @@ public interface IUserService {
     public List <User> getNewUserByNbDays(int nbDays);
     public void logout(Authentication auth);
 	public void deleteRole(long userId);
+
+	void updateDateCreation(Date d, Authentication auth);
+	void updateDateLastLogin(Date d, Authentication auth);
 }

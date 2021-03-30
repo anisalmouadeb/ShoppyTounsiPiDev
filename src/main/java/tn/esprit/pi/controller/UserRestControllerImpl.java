@@ -1,5 +1,6 @@
 package tn.esprit.pi.controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tn.esprit.pi.entities.Tokens;
 import tn.esprit.pi.entities.User;
+import tn.esprit.pi.payload.DateUpdate;
 import tn.esprit.pi.payload.JwtResponse;
 import tn.esprit.pi.payload.MessageResponse;
 import tn.esprit.pi.repository.TokenReopsitory;
@@ -138,14 +140,24 @@ public class UserRestControllerImpl {
 		}
 
 	@DeleteMapping(value = "/deleteRole/{userId}")
-
 	@ResponseBody	
 		public int deleteRole(@PathVariable("userId") int userId) {
 			  iUserService.deleteRole(userId);
 			  return 1;
 		}
 
-	
+	@PutMapping(value = "/updateDateCreation")
+	@ResponseBody	
+		public int updateDateCreation(@RequestBody DateUpdate d, Authentication auth) {
+			  iUserService.updateDateCreation(d.getD(),auth);
+			  return 1;
+		}
+	@PutMapping(value = "/updateDateLastLogin")
+	@ResponseBody	
+		public int updateDateLastLogin(@RequestBody DateUpdate d, Authentication auth) {
+			  iUserService.updateDateLastLogin(d.getD(),auth);
+			  return 1;
+		}
 
 
 }
