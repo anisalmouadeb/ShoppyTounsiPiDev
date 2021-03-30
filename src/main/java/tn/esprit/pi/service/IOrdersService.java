@@ -25,9 +25,8 @@ public interface IOrdersService {
 
 	public Orders GetOrderOftheMonth();
 
-	
 	public User GetStarUserOftheMonth();
 
-
+	public String CancelOrder(long OrderId);
 
 }

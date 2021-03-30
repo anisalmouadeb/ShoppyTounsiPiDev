@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -90,5 +91,11 @@ public class OrdersController {
 	@ResponseBody
 	public User GetStarUserOftheMonth() {
 		return OrdersService.GetStarUserOftheMonth();
+	}
+	
+	@PostMapping(value = "/CancelOrder/{orderId}")
+	@ResponseBody
+	public String CancelOrder(@PathVariable("orderId")long orderId) {
+		return OrdersService.CancelOrder(orderId);
 	}
 }

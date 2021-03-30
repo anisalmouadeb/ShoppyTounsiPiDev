@@ -10,10 +10,14 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
+import tn.esprit.pi.configuration.EmailConfig;
 import tn.esprit.pi.entities.BonAchat;
+import tn.esprit.pi.entities.MailHistory;
 import tn.esprit.pi.entities.OrderLine;
 import tn.esprit.pi.entities.Orders;
 import tn.esprit.pi.entities.ShoppingCart;
@@ -27,7 +31,12 @@ import tn.esprit.pi.repository.UserRepository;
 
 @Service
 public class OrdersServiceImpl implements IOrdersService {
+	private EmailConfig emailCfg;
 
+    public OrdersServiceImpl(EmailConfig emailCfg) {
+        this.emailCfg = emailCfg;
+    }
+	
 	@Autowired
 	ShoppingCartRepository ShoppingCartRepo;
 	@Autowired
@@ -169,7 +178,46 @@ public class OrdersServiceImpl implements IOrdersService {
 			u = o.getShoppingCart().getUser();
 		}
 		u.setPoint(u.getPoint() + 20);
+		userRepo.save(u);
 		return u;
 	}
 
+	@Override
+	public String CancelOrder(long OrderId) {
+		Date d = new Date();
+		Date expiration = new Date(d.getTime() - (1 * 86400000));
+		Orders o = OrdersRepo.findById(OrderId).get();
+		if (o.getOrderDate().compareTo(expiration) >0&& o.getConfirmedPayment()==true) {
+			o.setConfirmedPayment(false);
+			User u = new User();
+			for (OrderLine o1 : o.getOrderLine()) {
+				System.out.println(o1.getShoppingCart().getShoppingCartId());
+				u = o1.getShoppingCart().getUser();
+				System.out.println(u.getName());
+				
+			}
+			u.setPoint((int) (u.getPoint() + (o.getOrderAmount() / 10)));
+
+			userRepo.save(u);
+			
+			
+			JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+			mailSender.setHost(this.emailCfg.getHost());
+			mailSender.setPort(this.emailCfg.getPort());
+			mailSender.setUsername(this.emailCfg.getUsername());
+			mailSender.setPassword(this.emailCfg.getPassword());
+			// Create an email instance
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setFrom("ShoppyTounsi@Gmail.com");
+			mailMessage.setTo(u.getEmail());
+			mailMessage.setSubject("you  order was canceled  ");
+			mailMessage.setText("you have received as refund some points "+o.getOrderAmount() / 10);
+			// Send mail
+			mailSender.send(mailMessage);	
+	
+
+	return "cancel order";
+		}
+		return "can't cancel order";
+	}
 }
