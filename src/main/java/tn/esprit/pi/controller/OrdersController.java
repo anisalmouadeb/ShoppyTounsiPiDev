@@ -62,6 +62,12 @@ public class OrdersController {
 	 * return OrdersService.InsertOrderLineToOrder(orderLineId); }
 	 */
 
+	
+	@RequestMapping(value = "/PaymentDone/{OrderId}/{code}", method = RequestMethod.POST)
+	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN') ")
+	public String PaymentDone(@PathVariable("OrderId") long OrderId, @PathVariable("code") String code) {
+		return OrdersService.PaymentDone(OrderId, code);
+	}
 	@GetMapping("/export/pdf/{id}")
 	public void exportToPDF(HttpServletResponse response, @PathVariable("id") long id)
 			throws DocumentException, IOException {

@@ -80,6 +80,7 @@ public class OrdersServiceImpl implements IOrdersService {
 				OrderLineRepo.save(o);
 			}
 		}
+		order.setConfirmedPayment(false);
 		order.setOrderDate(date);
 		order.setOrderAmount(totalAmount);
 		OrdersRepo.save(order);
@@ -115,7 +116,11 @@ public class OrdersServiceImpl implements IOrdersService {
 		System.out.println(Totalpts + BaPrice);
 		System.out.println(totalAmountOrder);
 		if (totalAmountOrder < Totalpts + BaPrice) {
+			o.setConfirmedPayment(true);
+			OrdersRepo.save(o);
 			return "payment done with success ";
+		
+		
 		} else {
 			return "update BA or points ";
 		}
