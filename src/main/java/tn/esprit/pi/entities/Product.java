@@ -5,12 +5,14 @@ import java.io.Serializable;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,8 +36,8 @@ public class Product implements Serializable {
 	private Category category;
 	private boolean inPromo;
 	private String image;
-	@OneToMany(mappedBy = "product")
-	private List<Ad> ads;
+	@OneToOne(mappedBy="product",cascade=CascadeType.REMOVE)
+	private Ad ad;
 	@OneToMany(mappedBy = "product")
 	private List<Claim> claim;
 @JsonIgnore
@@ -43,7 +45,7 @@ public class Product implements Serializable {
 	private List<Entry> entry;
 
 	public Product(String name, String description, float priceV, float priceA, int quantity, long code,
-			Category category, boolean inPromo, String image, List<Ad> ads) {
+			Category category, boolean inPromo, String image, Ad ad) {
 		super();
 		this.name = name;
 		this.description = description;
@@ -54,7 +56,7 @@ public class Product implements Serializable {
 		this.category = category;
 		this.inPromo = inPromo;
 		this.image = image;
-		this.ads = ads;
+		this.ad = ad;
 	}
 
 	public Product() {
@@ -143,12 +145,12 @@ public class Product implements Serializable {
 		this.image = image;
 	}
 
-	public List<Ad> getAds() {
-		return ads;
+	public Ad getAd() {
+		return ad;
 	}
 
-	public void setAds(List<Ad> ads) {
-		this.ads = ads;
+	public void setAd(Ad ad) {
+		this.ad = ad;
 	}
 
 

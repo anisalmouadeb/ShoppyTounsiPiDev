@@ -1,17 +1,28 @@
 package tn.esprit.pi.service;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import tn.esprit.pi.entities.Category;
+import tn.esprit.pi.entities.CategoryEnum;
 
 public interface ICategoryService {
-	
-	public Category addCategory(Category category);
 
-	public void DeleteCategoryById(long categoryId);
+	void addCategory(Category category);
 
-	public List<Category> getAllCategory();
-	
-	public Category updateCategory(Category category);
+	List<Category> getAll();
+
+    Category updateCategory(Category category);
+
+	Optional<Category> getById(Long id);
+
+	Category findByCategoryType(CategoryEnum categoryType);
+
+	void deleteById(long categoryId);
+
+	Page<Category> getAllCategories(Pageable pageable);
 
 }

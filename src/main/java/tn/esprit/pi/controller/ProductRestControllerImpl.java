@@ -1,87 +1,136 @@
 package tn.esprit.pi.controller;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-
+import com.itextpdf.text.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import tn.esprit.pi.entities.CategoryEnum;
 import tn.esprit.pi.entities.Product;
-import tn.esprit.pi.service.ProductService;
+
+import tn.esprit.pi.service.IProductService;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 
 @RestController
+
+@RequestMapping("/product")
+
 public class ProductRestControllerImpl {
-	
-	
+
 	@Autowired
-	ProductService productService;
+    private  IProductService iProductService;
 
-	@PostMapping("/addProduct")
-	public ResponseEntity<Object> addProduct(@RequestBody Product product) {
-		boolean c = CheckingTunisianproducts(String.valueOf(product.getCode()));
-		if (c == true) {
-			this.productService.addProduct(product);
-			return new ResponseEntity<>("Product add successfully",HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>("The product is not added because it is not Tunisian made",HttpStatus.NO_CONTENT);
-		}
 
-	}
+    @PostMapping("/add")
+    public ResponseEntity<String> addProduct(@RequestBody Product product)  {
+       
+        String result=iProductService.addProduct(product);
 
-	public boolean CheckingTunisianproducts(String code) {
-		String Str = new String();
-		Str = code;
-		Str = Str.substring(0, 3);
-		return Str.equals("619");
-	}
+        return new ResponseEntity<>(result,HttpStatus.OK);
+    }
 
-	@PutMapping("/updateProduct")
-	public  ResponseEntity<String> updateProduct(@RequestBody Product product) {
+    @GetMapping("productById/{id}")
+    public ResponseEntity<Optional<Product>> getProductById(@PathVariable String id) {
+        
+        Optional<Product> product = iProductService.getById(Long.parseLong(id));
+        return new ResponseEntity<>(product, HttpStatus.OK);
+    }
 
-		boolean c = CheckingTunisianproducts(String.valueOf(product.getCode()));
-		if (c == true) {
-			this.productService.updateProduct(product);
-			return ResponseEntity.ok("Product update successfully");
-		} else {
-			return ResponseEntity.ok("The product is not updated because it is not Tunisian made");
-		}
-	}
+    @GetMapping("/pagination")
+    public ResponseEntity<Page<Product>> getAllProductsByPage(@RequestParam(required = false) CategoryEnum categoryType,
+                                                              Pageable pageable) {
+        
+        Page products = null;
+        if (categoryType != null) {
+            long count = iProductService.getProductsByCategory(categoryType, pageable).getTotalElements();
+            products = PageableExecutionUtils.getPage(
+                    iProductService.getProductsByCategory(categoryType, pageable).getContent(), pageable, () -> count);
+        } else {
+            long count = iProductService.getProducts(pageable).getTotalElements();
+            products = PageableExecutionUtils.getPage(iProductService.getProducts(pageable).getContent(), pageable,
+                    () -> count);
+        }
+        if (products.getTotalElements() == 0) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
 
-	@GetMapping("/allProducts")
-	public List<Product> allProducts() {
-		return this.productService.getAllProducts();
-	}
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<Void> deleteProductById(@PathVariable String id) {
+        
+        iProductService.deleteById(Long.parseLong(id));
+        return  ResponseEntity.ok().build();
+    }
 
-	@DeleteMapping("/deleteProduct")
-	public void deleteProduct(@PathVariable("productId") Long productId) {
-		this.productService.DeleteProductById(productId);
-	}
-	
-	@RequestMapping(value="/addImage",method=RequestMethod.POST,consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<Object> uploadFile (@RequestParam("multipartFile") MultipartFile multipartFile,@RequestParam("productId") Long productId) throws IOException
-	{
-		File convertImage = new File("C:\\test\\"+multipartFile.getOriginalFilename());
-		convertImage.createNewFile();
-		FileOutputStream fout =new FileOutputStream(convertImage);
-		fout.write(multipartFile.getBytes());
-		fout.close();
-		this.productService.updateProductWithImage(multipartFile.getOriginalFilename(), productId);
-		return new ResponseEntity<>("Image is uploaded successfuly  "+multipartFile.getOriginalFilename(),HttpStatus.OK);
-	}
+    @RequestMapping(value = "/addImage", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> uploadFile(@RequestParam("multipartFile") MultipartFile multipartFile,
+                                             @RequestParam("productId") String productId) throws IOException {
+
+        File convertImage = new File("C:\\test\\" + multipartFile.getOriginalFilename());
+        convertImage.createNewFile();
+        FileOutputStream fout = new FileOutputStream(convertImage);
+        fout.write(multipartFile.getBytes());
+        fout.close();
+        this.iProductService.affecteImageToProduct(multipartFile.getOriginalFilename(), Long.parseLong(productId));
+        return new ResponseEntity<>("Image is uploaded successfuly  " + multipartFile.getOriginalFilename(),
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/allProducts")
+    public ResponseEntity<List<Product>> allProducts() {
+        List<Product> products = this.iProductService.getAllProducts();
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    @GetMapping("/productByName/{name}")
+    public ResponseEntity<Optional<Product>> productByName(@PathVariable String name) {
+        Optional<Product> prod = this.iProductService.getByName(name);
+        return new ResponseEntity<>(prod, HttpStatus.OK);
+
+    }
+
+
+    @GetMapping("gain")
+    public ResponseEntity<Map<String, String>> calculateGain() throws ParseException {
+        return ResponseEntity.ok(iProductService.GainLastOrdersPerMonth());
+    }
+
+
+    @PostMapping("generate-pdf")
+    public ResponseEntity<String> generatePDF() throws FileNotFoundException, DocumentException, ParseException {
+        return ResponseEntity.ok(iProductService.generatePDF());
+    }
+    // percentage selled product per orderline
+    @GetMapping("product")
+    public ResponseEntity<Map<String, Float>> countSelledProduct() {
+        Map<String, Float> selledProducts = this.iProductService.countSelledProduct();
+        return new ResponseEntity<>(selledProducts, HttpStatus.OK);
+    }
+
+    // percentage selled category per orderline
+    @GetMapping("category")
+    public ResponseEntity<Map<String, Float>> countSelledProductPerCategory() {
+        Map<String, Float> selledProducts = this.iProductService.countSelledProductPerCategory();
+        return new ResponseEntity<>(selledProducts, HttpStatus.OK);
+    }
+    
+   
+
 
 }

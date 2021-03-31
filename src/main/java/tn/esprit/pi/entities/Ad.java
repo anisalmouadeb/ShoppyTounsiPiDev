@@ -3,149 +3,109 @@ package tn.esprit.pi.entities;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 @Entity
 public class Ad implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Id
-	private long adId;
-	private String name;
-	private String Channel;
-	private int nbTouchedPpl;
-	private int nbTargetViews;
-	private float price;
-	private String adType;
-	private String image;
-	private int age;
-	@Temporal(TemporalType.DATE)
-	private Date StartDate;
-	@Temporal(TemporalType.DATE)
-	private Date EndDate;
-	@ManyToOne
-	private Product product;
-
-	public Ad(String name, String channel, int nbTouchedPpl, int nbTargetViews, float price, String adType,
-			Date startDate, Date endDate, Product product) {
-		super();
-		this.name = name;
-		Channel = channel;
-		this.nbTouchedPpl = nbTouchedPpl;
-		this.nbTargetViews = nbTargetViews;
-		this.price = price;
-		this.adType = adType;
-		StartDate = startDate;
-		EndDate = endDate;
-		this.product = product;
-	}
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    private long id;
+    private String name;
+    
+    private int touchedPeople;
+    private int views;
+    private float price;
+    private float discount;
+    private String image;
+    //private int age;
+    @Temporal(TemporalType.DATE)
+    private Date startDate;
+    @Temporal(TemporalType.DATE)
+    private Date endDate;
+    @OneToOne
+    private Product product;
 	public Ad() {
 		super();
+		// TODO Auto-generated constructor stub
 	}
-
-	public String getImage() {
-		return image;
-	}
-
-	public void setImage(String image) {
+	public Ad(String name, int touchedPeople, int views, float price, float discount, String image, Date startDate,
+			Date endDate, Product product) {
+		super();
+		this.name = name;
+		this.touchedPeople = touchedPeople;
+		this.views = views;
+		this.price = price;
+		this.discount = discount;
 		this.image = image;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.product = product;
 	}
-
-	public int getAge() {
-		return age;
+	public long getId() {
+		return id;
 	}
-
-	public void setAge(int age) {
-		this.age = age;
+	public void setId(long id) {
+		this.id = id;
 	}
-
-	public long getAdId() {
-		return adId;
-	}
-
-	public void setAdId(long adId) {
-		this.adId = adId;
-	}
-
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public String getChannel() {
-		return Channel;
+	public int getTouchedPeople() {
+		return touchedPeople;
 	}
-
-	public void setChannel(String channel) {
-		Channel = channel;
+	public void setTouchedPeople(int touchedPeople) {
+		this.touchedPeople = touchedPeople;
 	}
-
-	public int getNbTouchedPpl() {
-		return nbTouchedPpl;
+	public int getViews() {
+		return views;
 	}
-
-	public void setNbTouchedPpl(int nbTouchedPpl) {
-		this.nbTouchedPpl = nbTouchedPpl;
+	public void setViews(int views) {
+		this.views = views;
 	}
-
-	public int getNbTargetViews() {
-		return nbTargetViews;
-	}
-
-	public void setNbTargetViews(int nbTargetViews) {
-		this.nbTargetViews = nbTargetViews;
-	}
-
 	public float getPrice() {
 		return price;
 	}
-
 	public void setPrice(float price) {
 		this.price = price;
 	}
-
-	public String getAdType() {
-		return adType;
+	public float getDiscount() {
+		return discount;
 	}
-
-	public void setAdType(String adType) {
-		this.adType = adType;
+	public void setDiscount(float discount) {
+		this.discount = discount;
 	}
-
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
 	public Date getStartDate() {
-		return StartDate;
+		return startDate;
 	}
-
 	public void setStartDate(Date startDate) {
-		StartDate = startDate;
+		this.startDate = startDate;
 	}
-
 	public Date getEndDate() {
-		return EndDate;
+		return endDate;
 	}
-
 	public void setEndDate(Date endDate) {
-		EndDate = endDate;
+		this.endDate = endDate;
 	}
-
 	public Product getProduct() {
 		return product;
 	}
-
 	public void setProduct(Product product) {
 		this.product = product;
 	}
+    
+    
+
 
 }

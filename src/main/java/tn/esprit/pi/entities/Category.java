@@ -23,10 +23,13 @@ public class Category implements Serializable {
 	@Id
 	private long categoryId;
 	private String name;
+	@JsonIgnore
 	@OneToMany(mappedBy = "category",cascade=CascadeType.REMOVE)
 	private List<Product> product;
 	@Enumerated(EnumType.STRING)
 	private ShelfType type;
+	@Enumerated(EnumType.STRING)
+	private CategoryEnum categoryType;
 	@JsonIgnore
 	@ManyToOne 
 	private Shelf shelf;
@@ -91,5 +94,14 @@ public class Category implements Serializable {
 	public void setLastShelf(long lastShelf) {
 		LastShelf = lastShelf;
 	}
+
+	public CategoryEnum getCategoryType() {
+		return categoryType;
+	}
+
+	public void setCategoryType(CategoryEnum categoryType) {
+		this.categoryType = categoryType;
+	}
+	
 
 }
