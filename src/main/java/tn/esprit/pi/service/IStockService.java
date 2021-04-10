@@ -25,4 +25,5 @@ public interface IStockService {
 	public int getSumOutlay ();
 	public List<BonCommande> getBonCommandListOutOfDate() ;
 	List<BonCommande> getBonCommandInProccess();
+	int getLastSevenDaysQuantity(long productId);
 }

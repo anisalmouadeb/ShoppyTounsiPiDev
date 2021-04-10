@@ -60,7 +60,7 @@ public class ResetPasswordController {
 		mailMessage.setTo(user.getEmail());
 		mailMessage.setSubject("Reset  Password ShoppyTounsi");
 		mailMessage.setText(
-				"To reset your password, use this code \n" + user.getResetToken());
+				"To reset your password, use click into this url code  localhost:8081//" + user.getResetToken());
 		// Send mail
 		mailSender.send(mailMessage);
 		Date d = new Date(System.currentTimeMillis());

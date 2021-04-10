@@ -23,7 +23,6 @@ public class Category implements Serializable {
 	@Id
 	private long categoryId;
 	private String name;
-	@JsonIgnore
 	@OneToMany(mappedBy = "category",cascade=CascadeType.REMOVE)
 	private List<Product> product;
 	@Enumerated(EnumType.STRING)

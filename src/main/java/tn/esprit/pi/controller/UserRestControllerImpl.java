@@ -52,7 +52,7 @@ public class UserRestControllerImpl {
 	}
 
 	@GetMapping("/getMyInfo")
-	@PreAuthorize("hasRole('ADMIN')or hasRole('CLIENT')")
+	@PreAuthorize(" hasRole('CLIENT')")
 	@ResponseBody
 	public User getMyInfo(Authentication auth) {
 

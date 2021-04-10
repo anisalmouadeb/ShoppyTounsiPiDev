@@ -132,5 +132,14 @@ public class StockRestControllerImpl {
 
 		return iStockService.getBonCommandInProccess();
 	}
+
+	@GetMapping(value = "getLastSevenDaysQuantity/{productId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public int getLastSevenDaysQuantity(@PathVariable("productId") long productId) {
+
+		return iStockService.getLastSevenDaysQuantity(productId);
+	}
+	
 	
 }

@@ -88,6 +88,10 @@ public class ShelfServiceImpl implements IShelfService {
 			Date expiration = new Date(d.getTime() + (24 * 86400000));
 			Date expiration2 = new Date(expiration.getTime() + (6 * 86400000));
 			shelf.setDateExpiration(expiration2);
+			shelfRepository.save(shelf);
+			Category category = categoryRepository.findByName("Ramadansupplies");
+			System.out.println(category.getName());
+			this.affecterCategoryShelf(category.getCategoryId(), shelf.getShelfId());
 		}
 		shelfRepository.save(shelf);
 		return "added";
@@ -95,17 +99,22 @@ public class ShelfServiceImpl implements IShelfService {
 
 	@Override
 	public String DeleteShelfById(long shelfId) {
-
+		System.out.println("hi1");
 		Shelf shelf = shelfRepository.findById(shelfId).get();
+		Category category = categoryRepository.findByName("Ramadansupplies");
 
 		for (Category cat : shelf.getCategory()) {
-
+if (cat.equals(category))
+{System.out.println("hi");
+	cat.setShelf(null);
+	break;
+}
 			for (Product p : cat.getProduct()) {
 				p.setInPromo(false);
 				p.setPriceV(p.getPriceV() + (p.getPriceV() * shelf.getReductionPercantage()) / 100);
                 productRepository.save(p);
 			}
-			System.out.println("hi");
+			
 			Shelf s= shelfRepository.findById(cat.getLastShelf()).get();
 			cat.setShelf(s);
 
@@ -475,26 +484,26 @@ Collections.sort(rev);
 		return s;
 	}
 
-	//@Scheduled(cron = "*/20 * * * * *")
+	@Scheduled(cron = "*/20 * * * * *")
 	@Override
 	@Transactional
 	public void deleteShelfByDate() {
 		List<Shelf> shelfs = new ArrayList<Shelf>();
 		shelfs = (List<Shelf>) shelfRepository.findAll();
 		Date d = new Date(System.currentTimeMillis());
-		Date thirtyDaysAgo = new Date(d.getTime() + (1 * 86400000));
+		Date expiration = new Date(d.getTime() + (1 * 86400000));
 		for (Shelf s : shelfs) {
 
 			if (s.getDateExpiration() != null) {
-				System.out.println(thirtyDaysAgo);
-				if (s.getDateExpiration().compareTo(thirtyDaysAgo) < 0) {
+				System.out.println(expiration);
+				if (s.getDateExpiration().compareTo(expiration) < 0) {
 			
 					this.DeleteShelfById(s.getShelfId());
 
 				}
 			}
 		}
-		System.out.println(thirtyDaysAgo);
+		System.out.println(expiration);
 		System.out.println("anis");
 	}
 
@@ -513,7 +522,7 @@ Collections.sort(rev);
 		Shelf shelf = shelfRepository.findById(shelfId).get();
 		Category category = categoryRepository.findById(categoryId).get();
 		category.setShelf(shelf);
-
+       System.out.println("Shelf");
 		if (shelf.getType().equals(ShelfType.PROMO)) {
 			for (Product p : category.getProduct()) {
 				p.setInPromo(true);

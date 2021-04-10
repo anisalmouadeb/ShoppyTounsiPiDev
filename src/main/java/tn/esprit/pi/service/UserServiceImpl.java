@@ -6,6 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import tn.esprit.pi.entities.Roles;
 import tn.esprit.pi.entities.ShelfRating;
 import tn.esprit.pi.entities.Tokens;
 import tn.esprit.pi.entities.User;
+import tn.esprit.pi.payload.MessageResponse;
 import tn.esprit.pi.repository.BlacklistTokenRepository;
 import tn.esprit.pi.repository.LoggRepository;
 import tn.esprit.pi.repository.ShelfRatingRepository;
@@ -68,6 +71,68 @@ public class UserServiceImpl implements IUserService {
 	}
 
 
+	//@Scheduled(cron = "*/7 * * * * *")
+	@Override
+	@Transactional
+public void UpdatePointBatch( ) {
+		int index=0;
+		List<User> alluser= userRepository.findAll();
+		for(User user: alluser){
+			for(Roles r :user.getRoles())
+			{
+			
+		if(!user.isDesactivate()){
+			if(r.getName().equals(Role.ROLE_CLIENT))
+			{
+				
+			
+			Date datecreate=user.getDateCreate();
+			Date today=new Date();
+			int yearToday=today.getYear();
+			if((yearToday+1900)!=user.getLastyearaddpoint()){
+			
+			if(today.getDate()==datecreate.getDate() && today.getMonth()==datecreate.getMonth() && today.getYear()!=datecreate.getYear() )
+			{
+				user.setPoint(user.getPoint()+100);
+				user.setLastyearaddpoint(yearToday+1900);
+				userRepository.save(user);
+				index++;
+			
+			}
+			}
+			}
+		}
+		}
+		}	
+		System.out.println("point");
+	}
+
+	//@Scheduled(cron = "*/10 * * * * *")
+	@Override
+	@Transactional
+	public void desactivateUsersBatch() {
+		//number  desactivate account
+		int index=0;
+		List<User> alluser= userRepository.findAll();
+		for(User user: alluser){
+		if(!this.getRoleById(user.getUserId()).contains("admin") && !user.isDesactivate()){
+			Date lastlogin=user.getLastLoginDate();
+			if((new Date()).getMonth()- lastlogin.getMonth()>=1 || (new Date()).getYear()- lastlogin.getYear()>=1 ){
+				user.setDesactivate(true);	
+				user.setConnected(false);
+				userRepository.save(user);
+				this.setTokenToBlackList(user.getUserId());
+				index++;
+			}
+		}
+		}
+		System.out.println("deactivate");
+	}
+	
+	
+	
+	
+	
 	@Override
 	public String deleteUserById(long userId) {
 		User u = userRepository.findById(userId).get();
@@ -140,6 +205,7 @@ public class UserServiceImpl implements IUserService {
 	public void activate_Acount(long userId) {
 		User user = userRepository.findById(userId).get();
 		user.setDesactivate(false);
+		user.setLastLoginDate(new Date());
 		userRepository.save(user);
 	}
 
@@ -241,5 +307,7 @@ public class UserServiceImpl implements IUserService {
 		u.setLastLoginDate(d);
 		userRepository.save(u);
 	}
+	
+
 	
 }

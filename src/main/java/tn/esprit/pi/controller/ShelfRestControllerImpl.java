@@ -55,7 +55,7 @@ public class ShelfRestControllerImpl {
 	@PostMapping("/addShelf")
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
-	public ResponseEntity<?> addShelf(@RequestBody Shelf shelf) {
+	public ResponseEntity<?> addShelf(Authentication auth,@RequestBody Shelf shelf) {
 		List<Shelf> shelfs = (List<Shelf>) shelfRepo.findAll();
 		if(shelf.getType().equals(ShelfType.RAMADHAN))
 		for (Shelf s : shelfs) {
@@ -74,7 +74,8 @@ public class ShelfRestControllerImpl {
 		}
 		}
 		}
-		
+		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		SharedLogg.addlog("shelf", "add",userDetails);
 		 ishelfService.addShelf(shelf);
 		return ResponseEntity.ok("Shalf added shelfId :"+ shelf.getShelfId());
 	}
@@ -102,7 +103,7 @@ public class ShelfRestControllerImpl {
 	}
 
 	@GetMapping(value = "/getAllShelfs")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Shelf> getAllShelfss() {
 
@@ -125,7 +126,7 @@ public class ShelfRestControllerImpl {
 	
 	
 	@GetMapping(value = "/getShelfById/{idshelf}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public ResponseEntity<?> getShelfById(@PathVariable("idshelf") long shelfId) {
 
@@ -139,7 +140,7 @@ public class ShelfRestControllerImpl {
 	}
 
 	@GetMapping(value = "getNombreShelf")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public int getNombreEmployeJPQL() {
 
@@ -147,7 +148,7 @@ public class ShelfRestControllerImpl {
 	}
 
 	@GetMapping("/getShelfByType/{type}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public List<Shelf> getShelfByType(@PathVariable("type") ShelfType type) {
 		return ishelfService.getShelfByType(type);
@@ -175,21 +176,21 @@ public class ShelfRestControllerImpl {
 	}
 
 	@GetMapping(value = "getAllCategoriesNameByShelfId/{idshelf}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public List<String> getAllCategoriesNameByShelfId(@PathVariable("idshelf") int shelfId) {
 		return ishelfService.getAllCategoriesNameByShelfId(shelfId);
 	}
 
 	@GetMapping(value = "getAllCategoriesByShelfId/{idshelf}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public List<Category> getAllCategoriesByShelfId(@PathVariable("idshelf") int shelfId) {
 		return ishelfService.getAllCategoryByShelfJPQL(shelfId);
 	}
 
 	@GetMapping(value = "getAllProductsByShelfId/{idshelf}")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public List<String> getAllProductsByShelfId(@PathVariable("idshelf") int shelfId) {
 		return ishelfService.getAllProductByShelfJPQL(shelfId);
@@ -207,8 +208,8 @@ public class ShelfRestControllerImpl {
 		}
 		
 		ishelfService.saveOrUpdateRating(auth, shelfId, rating);
-		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
-		SharedLogg.addlog("shelfRating", "add",userDetails);
+		//UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();		
+		//SharedLogg.addlog("shelfRating", "add",userDetails);
 		
 		return ResponseEntity.ok().body(new MessageResponse("Rating added"));
 
@@ -226,27 +227,27 @@ public class ShelfRestControllerImpl {
 	}
 
 	@GetMapping(value = "getAllRating")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<ShelfRating> getAllRating() {
 		return ishelfService.getAllRating();
 	}
 	@GetMapping(value = "getOrdersByUser")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public List<Product> getOrders(Authentication auth) {
 		return ishelfService.getOders(auth);
 	}
 	
 	@GetMapping(value = "getRatingbyId/{idrating}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public ShelfRating getRatingbyId(@PathVariable("idrating") long ratingId) {
 		return ishelfService.getRatingbyId(ratingId);
 	}
 
 	@GetMapping(value = "getUsersRateByShelf/{idshelf}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<User> getUSersByShelf(@PathVariable("idshelf") long idshelf) {
 		return ishelfService.getUSersByShelf(idshelf);
@@ -292,7 +293,7 @@ public class ShelfRestControllerImpl {
 	}	
 
 	@GetMapping(value = "getOrdersByShelf/{idshelf}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Product> getOrdersByShelf(@PathVariable("idshelf") long idshelf) {
 		return ishelfService.getOrdersByShelf(idshelf);

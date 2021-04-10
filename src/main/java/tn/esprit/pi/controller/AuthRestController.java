@@ -1,5 +1,4 @@
 package tn.esprit.pi.controller;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -253,7 +253,7 @@ try{
 	
 	
 	
-
+	
 	@PostMapping("/batch-desactivate")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> desactivateUsersBatch() {

@@ -133,6 +133,7 @@ public class StockServiceImpl implements IStockService {
 		return providers2;
 	}
 
+	@Override
 	public int getLastSevenDaysQuantity(long productId)
 	{   Product p = productRepository.findById(productId).get();
 		int nb=0;
@@ -166,7 +167,11 @@ public class StockServiceImpl implements IStockService {
 			if(p.getDisponibility()==false)
 			provs.remove(p);
 		}
+		for (Provider p : provs )
+			System.out.println(p.getName());
 		Collections.sort(provs);
+		for (Provider p : provs )
+			System.out.println(p.getName());
         int q= this.getLastSevenDaysQuantity(productId);
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		mailSender.setHost(this.emailCfg.getHost());

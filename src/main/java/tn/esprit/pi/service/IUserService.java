@@ -22,4 +22,7 @@ public interface IUserService {
 
 	void updateDateCreation(Date d, Authentication auth);
 	void updateDateLastLogin(Date d, Authentication auth);
+	void UpdatePointBatch();
+	void desactivateUsersBatch();
+
 }

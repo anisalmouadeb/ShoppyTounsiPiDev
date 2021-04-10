@@ -118,7 +118,7 @@ public class Provider implements Serializable , Comparable<Provider>{
 		{
 			return -(this.getReductionPercentage() - o.getReductionPercentage());
 		}
-		return (int) -(this.getSeuilMontant()-o.getSeuilMontant());
+		return (int) (this.getSeuilMontant()-o.getSeuilMontant());
 	}
 
 

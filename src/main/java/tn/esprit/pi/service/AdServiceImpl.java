@@ -154,7 +154,7 @@ public class AdServiceImpl implements IAdService {
 	}
 
 	@Override
-	@Scheduled(cron = "*/10 * * * * ?")
+	//@Scheduled(cron = "*/10 * * * * ?")
 	public String deleteExpiredAds() {
 		List<Ad> expiredAds = adRepository.findByEndDate(new Date());
 		if (expiredAds.size() != 0) {
@@ -177,7 +177,7 @@ public class AdServiceImpl implements IAdService {
 	}
 
 	@Override
-@Scheduled(cron = "*/30 * * * * ?") // chaque 28-29-30-31 à 10:25
+//@Scheduled(cron = "*/30 * * * * ?") // chaque 28-29-30-31 à 10:25
 	public void sendPromotionalMonth() throws MailjetSocketTimeoutException, MailjetException, JSONException {
 		//final Calendar c = Calendar.getInstance();
 		//if (c.get(Calendar.DATE) == c.getActualMinimum(Calendar.DATE)) {
@@ -215,7 +215,7 @@ public class AdServiceImpl implements IAdService {
 	}
 
 	@Override
-	@Scheduled(cron = "*/30 * * * * ?") // chaque 28-29-30-31 à 10:25
+	//@Scheduled(cron = "*/30 * * * * ?") // chaque 28-29-30-31 à 10:25
 	public void sendPromotionalSchool() throws MailjetSocketTimeoutException, MailjetException, JSONException {
 		//final Calendar c = Calendar.getInstance();
 		//if (c.get(Calendar.DATE) == c.getActualMinimum(Calendar.DATE)) {
