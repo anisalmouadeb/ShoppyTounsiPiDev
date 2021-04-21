@@ -20,6 +20,7 @@ import tn.esprit.pi.entities.BonAchat;
 import tn.esprit.pi.entities.MailHistory;
 import tn.esprit.pi.entities.OrderLine;
 import tn.esprit.pi.entities.Orders;
+import tn.esprit.pi.entities.Provider;
 import tn.esprit.pi.entities.ShoppingCart;
 import tn.esprit.pi.entities.User;
 import tn.esprit.pi.repository.BonAchatRepository;
@@ -224,5 +225,10 @@ public class OrdersServiceImpl implements IOrdersService {
 	return "cancel order";
 		}
 		return "can't cancel order";
+	}
+	
+	@Override
+	public List<Orders> getAllOrders() {
+		return (List<Orders>) OrdersRepo.findAll();
 	}
 }

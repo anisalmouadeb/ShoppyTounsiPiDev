@@ -29,4 +29,6 @@ public interface IOrdersService {
 
 	public String CancelOrder(long OrderId);
 
+	public List<Orders> getAllOrders();
+
 }

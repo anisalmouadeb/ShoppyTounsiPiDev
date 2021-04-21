@@ -44,7 +44,7 @@ public class UserRestControllerImpl {
 	JwtUtils jwtUtils;
 
 	@GetMapping("/getAllUsers")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<User> getAllUsers() {
 
@@ -52,7 +52,7 @@ public class UserRestControllerImpl {
 	}
 
 	@GetMapping("/getMyInfo")
-	@PreAuthorize("hasRole('ADMIN')or hasRole('CLIENT')")
+	//@PreAuthorize("hasRole('ADMIN')or hasRole('CLIENT')")
 	@ResponseBody
 	public User getMyInfo(Authentication auth) {
 
@@ -63,7 +63,7 @@ public class UserRestControllerImpl {
 	
 	
 	@DeleteMapping("/deleteUserById/{iduser}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public String deleteUserById(@PathVariable("iduser") long userId) {
 		
@@ -74,7 +74,7 @@ public class UserRestControllerImpl {
 	}
 
 	@PutMapping(value = "/updateUser")
-	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 	@ResponseBody
 	public ResponseEntity<?> updateUser(@RequestBody User u, Authentication auth) {
 		User u1 = userRepository.findByName(auth.getName()).get();
@@ -115,7 +115,7 @@ public class UserRestControllerImpl {
 	
 	}
 	@GetMapping(value = "/getRoleById/{iduser}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody	
 		public List<String> getRoleById(@PathVariable("iduser") long userId) {
 			
@@ -124,7 +124,7 @@ public class UserRestControllerImpl {
 
 		}
 	@GetMapping(value = "/getConnctedUsers")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody	
 		public List<User> getConnctedUsers() {
 			 return iUserService.getListConnectedUser();
@@ -132,7 +132,7 @@ public class UserRestControllerImpl {
 		}
 	
 	@GetMapping(value = "/getNewUserByNbDays/{nbDays}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody	
 		public List<User> getNewUserByNbDays(@PathVariable("nbDays") int nbDays) {
 			 return iUserService.getNewUserByNbDays(nbDays);

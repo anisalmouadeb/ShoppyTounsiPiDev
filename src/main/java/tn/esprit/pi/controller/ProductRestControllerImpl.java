@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import tn.esprit.pi.entities.Product;
+import tn.esprit.pi.entities.Provider;
 import tn.esprit.pi.service.ProductService;
 
 @RestController
@@ -82,6 +85,14 @@ public class ProductRestControllerImpl {
 		fout.close();
 		this.productService.updateProductWithImage(multipartFile.getOriginalFilename(), productId);
 		return new ResponseEntity<>("Image is uploaded successfuly  "+multipartFile.getOriginalFilename(),HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/getProductById/{idProduct}")
+	//@PreAuthorize("hasRole('ADMIN')")
+	@ResponseBody
+	public Product getProductById(@PathVariable("idProduct") long productId) {
+
+		return productService.getProductById(productId);
 	}
 
 }

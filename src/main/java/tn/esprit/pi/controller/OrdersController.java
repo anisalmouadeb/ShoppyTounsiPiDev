@@ -25,6 +25,7 @@ import com.lowagie.text.DocumentException;
 
 import tn.esprit.pi.entities.OrderLine;
 import tn.esprit.pi.entities.Orders;
+import tn.esprit.pi.entities.Provider;
 import tn.esprit.pi.entities.User;
 import tn.esprit.pi.repository.OrderLineRepository;
 import tn.esprit.pi.repository.OrdersRepository;
@@ -62,12 +63,12 @@ public class OrdersController {
 	 * return OrdersService.InsertOrderLineToOrder(orderLineId); }
 	 */
 
-	
 	@RequestMapping(value = "/PaymentDone/{OrderId}/{code}", method = RequestMethod.POST)
 	@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN') ")
 	public String PaymentDone(@PathVariable("OrderId") long OrderId, @PathVariable("code") String code) {
 		return OrdersService.PaymentDone(OrderId, code);
 	}
+
 	@GetMapping("/export/pdf/{id}")
 	public void exportToPDF(HttpServletResponse response, @PathVariable("id") long id)
 			throws DocumentException, IOException {
@@ -91,17 +92,22 @@ public class OrdersController {
 	public Orders GetOrderOftheMonth() {
 		return OrdersService.GetOrderOftheMonth();
 	}
-	
-	
+
 	@GetMapping(value = "/GetStarUserOftheMonth")
 	@ResponseBody
 	public User GetStarUserOftheMonth() {
 		return OrdersService.GetStarUserOftheMonth();
 	}
-	
+
 	@PostMapping(value = "/CancelOrder/{orderId}")
 	@ResponseBody
-	public String CancelOrder(@PathVariable("orderId")long orderId) {
+	public String CancelOrder(@PathVariable("orderId") long orderId) {
 		return OrdersService.CancelOrder(orderId);
+	}
+
+	@GetMapping(value = "/getAllOrders")
+	@ResponseBody
+	public List<Orders> getAllOrders() {
+		return OrdersService.getAllOrders();
 	}
 }

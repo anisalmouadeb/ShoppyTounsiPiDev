@@ -24,7 +24,7 @@ public class ProviderRestControllerImpl {
 
 	
 	@PostMapping("/addProvider")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public Provider addProvider(@RequestBody Provider provider) {
 		iProviderService.addProvider(provider);
@@ -32,7 +32,7 @@ public class ProviderRestControllerImpl {
 	}
 
 	@DeleteMapping("/deleteProviderById/{idProvider}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public void deleteProviderById(@PathVariable("idProvider") long providerId) {
 		iProviderService.DeleteProviderById(providerId);
@@ -40,7 +40,7 @@ public class ProviderRestControllerImpl {
 	}
 
 	@GetMapping(value = "/getAllProviders")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public List<Provider> getAllProviders() {
 
@@ -48,7 +48,7 @@ public class ProviderRestControllerImpl {
 	}
 
 	@GetMapping(value = "/getProviderById/{idProvider}")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public Provider getProviderById(@PathVariable("idProvider") long providerId) {
 
@@ -56,7 +56,7 @@ public class ProviderRestControllerImpl {
 	}
 	
 	@PutMapping("/updateProvider")
-	@PreAuthorize("hasRole('ADMIN')")
+	//@PreAuthorize("hasRole('ADMIN')")
 	@ResponseBody
 	public Provider updateShelf(@RequestBody Provider provider) {
 		iProviderService.updateProvider(provider);
